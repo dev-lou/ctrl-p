@@ -68,11 +68,21 @@ Route::get('/_diag', function (Request $request) {
 
 // Temporary migration route (remove after running)
 Route::get('/run-migrations', function () {
-    if (app()->environment('production')) {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        return 'Migrations completed! Output: ' . \Illuminate\Support\Facades\Artisan::output();
+    if (! app()->environment('production')) {
+        return 'Only available in production';
     }
-    return 'Only available in production';
+
+    // Run migrations programmatically to avoid booting the Console Kernel
+    try {
+        $migrator = app('migrator');
+        $paths = [database_path('migrations')];
+        $migrator->run($paths, ['pretend' => false, 'step' => true]);
+
+        $ran = $migrator->getRepository()->getRan();
+        return 'Migrations completed: ' . implode(', ', $ran);
+    } catch (\Throwable $e) {
+        return 'Migration error: ' . $e->getMessage();
+    }
 });
 
 // Home Page
