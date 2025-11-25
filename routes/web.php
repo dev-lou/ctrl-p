@@ -65,7 +65,8 @@ Route::get('/_diag', function (Request $request) {
         'db_status' => $dbStatus,
         'pg_options_type' => gettype(config('database.connections.pgsql.options')),
         'migrations_count' => DB::table('migrations')->count(),
-        'migrations' => DB::table('migrations')->orderBy('id','desc')->limit(10)->pluck('migration'),
+        'migrations' => DB::table('migrations')->orderBy('id','desc')->limit(50)->pluck('migration'),
+        'cache_migration_ran' => DB::table('migrations')->where('migration', '2025_11_15_051502_create_cache_table')->exists(),
     ]);
 });
 
