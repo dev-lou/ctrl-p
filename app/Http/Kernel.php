@@ -12,6 +12,8 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
+        // Ensure proxies (Vercel, Cloud providers) are trusted so scheme/host detection works
+        \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];

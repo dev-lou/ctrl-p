@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Order;
@@ -22,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force https when APP_URL uses https or in production behind proxies
+        if ($this->app->environment('production') || str_starts_with(config('app.url', ''), 'https://')) {
+            URL::forceScheme('https');
+        }
         // Define authorization gates
         $this->defineAuthorizationGates();
 
