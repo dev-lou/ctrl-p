@@ -13,6 +13,12 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
 
+// If Laravel Pail (development-only worker) is not installed on production,
+// provide a small stub so package discovery / provider registration won't fail in serverless.
+if (! class_exists(\Laravel\Pail\PailServiceProvider::class)) {
+    require_once __DIR__.'/../app/Compat/PailServiceProvider.php';
+}
+
 // Bootstrap Laravel and handle the request...
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
