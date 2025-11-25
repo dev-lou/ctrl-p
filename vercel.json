@@ -1,17 +1,13 @@
 {
   "version": 2,
   "framework": null,
+  "installCommand": "php -r \"copy('https://getcomposer.org/installer', 'composer-setup.php');\"; php composer-setup.php --install-dir=/tmp --filename=composer.phar; php /tmp/composer.phar install --no-dev --optimize-autoloader --no-interaction; rm composer-setup.php; rm -f /tmp/composer.phar;",
   "buildCommand": "npm ci && npm run build:production",
   "outputDirectory": "public",
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.1",
       "maxDuration": 30,
-      "memory": 1024
-    },
-    "api/migrate.php": {
-      "runtime": "vercel-php@0.7.1",
-      "maxDuration": 60,
       "memory": 1024
     }
   },
