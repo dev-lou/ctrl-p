@@ -1,13 +1,18 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && npm ci && npm run build:production",
-  "installCommand": "echo 'Using buildCommand for installation'",
+  "buildCommand": "npm ci && npm run build:production",
+  "outputDirectory": "public",
   "functions": {
     "api/index.php": {
-      "runtime": "vercel-php@0.7.0",
+      "runtime": "vercel-php@0.7.1",
       "maxDuration": 30,
-      "memory": 3008
+      "memory": 1024
+    },
+    "api/migrate.php": {
+      "runtime": "vercel-php@0.7.1",
+      "maxDuration": 60,
+      "memory": 1024
     }
   },
   "routes": [
