@@ -98,7 +98,8 @@ return [
             'sslmode' => env('DB_SSLMODE', 'prefer'),
             'options' => extension_loaded('pdo_pgsql') ? [
                 PDO::ATTR_TIMEOUT => 30,
-                PDO::ATTR_EMULATE_PREPARES => true,
+                // For PostgreSQL we must avoid emulated prepares so boolean values are sent with proper type
+                PDO::ATTR_EMULATE_PREPARES => false,
                 PDO::ATTR_STRINGIFY_FETCHES => false,
             ] : [],
             // Neon-specific: Pass endpoint ID for SNI support
