@@ -2,7 +2,7 @@
   "version": 2,
   "framework": null,
   "installCommand": "sh ./scripts/install-composer.sh",
-  "buildCommand": "npm ci && npm run build:production",
+  "buildCommand": "npm ci && npm run build:production && cp -f public/build/.vite/manifest.json public/build/manifest.json || true",
   "outputDirectory": "public",
   "functions": {
     "api/index.php": {
