@@ -17,7 +17,8 @@ class InventoryProductController extends Controller
      */
     public function index(Request $request): \Illuminate\View\View
     {
-        $query = Product::with('variants');
+        // eager-load only the columns we need from variants to reduce payload
+        $query = Product::with(['variants:id,product_id,stock_quantity,price_modifier']);
 
         // Apply search filter by product name
         if ($request->filled('search')) {
@@ -81,7 +82,8 @@ class InventoryProductController extends Controller
             $query->orderBy('name', $sortOrder);
         }
 
-        $products = $query->paginate(20);
+        // Use simplePaginate to avoid expensive total count queries on large datasets
+        $products = $query->simplePaginate(20);
 
         // Calculate statistics using DB queries (avoid loading all rows into memory)
         $totalProducts = Product::count();
