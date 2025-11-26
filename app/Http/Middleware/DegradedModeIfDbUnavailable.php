@@ -112,12 +112,31 @@ class DegradedModeIfDbUnavailable
                     // Shop product show (/shop/{slug})
                     if (str_starts_with($path, 'shop/') && count($request->segments()) >= 2) {
                         $slug = $request->segment(2);
+                        logger()->info('DegradedMode: Fetching product by slug', ['slug' => $slug]);
                         $remote = $fallback->getProductBySlug($slug);
                         if ($remote) {
                             $product = new FallbackProduct($remote);
                             $variants = $fallback->getVariantsForProduct($product->id) ?: collect([]);
                             $product->variants = collect($variants)->map(fn($v) => (object)$v);
-                            return $this->renderFallbackView('shop.show', ['product' => $product]);
+                            try {
+                                return $this->renderFallbackView('shop.show', ['product' => $product]);
+                            } catch (\Throwable $viewError) {
+                                logger()->error('DegradedMode: Product view failed', [
+                                    'error' => $viewError->getMessage(),
+                                    'file' => $viewError->getFile(),
+                                    'line' => $viewError->getLine(),
+                                ]);
+                                // Minimal product page fallback
+                                $html = '<!DOCTYPE html><html><head><title>' . htmlspecialchars($product->name) . ' - Ctrl+P</title></head><body>';
+                                $html .= '<h1>' . htmlspecialchars($product->name) . '</h1>';
+                                $html .= '<p>Price: ₱' . number_format($product->base_price, 2) . '</p>';
+                                $html .= '<p>' . htmlspecialchars($product->description ?? '') . '</p>';
+                                $html .= '<p><a href="/shop">← Back to Shop</a></p>';
+                                $html .= '</body></html>';
+                                return new Response($html, 200, ['Content-Type' => 'text/html']);
+                            }
+                        } else {
+                            logger()->warning('DegradedMode: Product not found', ['slug' => $slug]);
                         }
                     }
                 } catch (\Throwable $inner) {
