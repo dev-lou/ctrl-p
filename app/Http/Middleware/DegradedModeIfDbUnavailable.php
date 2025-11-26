@@ -49,7 +49,14 @@ class DegradedModeIfDbUnavailable
             if ($hasSupabaseRestFallback) {
                 // When the Supabase REST fallback key exists try to render common public pages
                 // directly from Supabase REST to avoid controller DB queries and handler 503s.
-                logger()->info('DegradedMode: Attempting REST fallback', ['path' => $path, 'path_length' => strlen($path), 'is_root' => ($path === '' || $path === '/')]);
+                logger()->info('DegradedMode: Attempting REST fallback', [
+                    'path' => $path, 
+                    'path_length' => strlen($path), 
+                    'is_root' => ($path === '' || $path === '/'),
+                    'is_shop' => ($path === 'shop' || $path === 'shop/'),
+                    'is_product' => str_starts_with($path, 'shop/'),
+                    'segments' => $request->segments(),
+                ]);
                 try {
                     $fallback = new SupabaseFallback();
                     
