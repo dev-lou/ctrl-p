@@ -171,13 +171,9 @@ window.addEventListener('load', function() {
             }
         }
 
-        if (pageLoadTime !== null && isFinite(pageLoadTime) && pageLoadTime >= 0) {
-            console.log('📊 Page load time:', pageLoadTime + 'ms');
-        } else {
-            console.log('📊 Page load timing not available or invalid — skipping.');
-        }
+        // Page load time available but logging disabled for production
     } catch (err) {
-        console.warn('Error computing page load time:', err);
+        // Silently ignore page load timing errors
     }
 });
 
