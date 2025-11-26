@@ -70,7 +70,7 @@ Route::get('/healthz', function () {
         logger()->warning('Health check: DB unreachable: ' . $e->getMessage());
         $fallback = null;
         // If we have a server-side key, try to verify the supabase REST is responding
-        if (!empty(env('SUPABASE_SERVICE_ROLE_KEY'))) {
+        if (!empty(config('services.supabase.service_role_key'))) {
             try {
                 $fallbackService = new \App\Services\SupabaseFallback();
                 $test = $fallbackService->getFeaturedProducts(1);
