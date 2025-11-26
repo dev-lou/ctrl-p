@@ -12,6 +12,10 @@ php artisan view:clear || true
 php artisan config:clear || true
 php artisan cache:clear || true
 
+# Try to prime caches for the homepage and home page. This is a best-effort
+# operation that helps the app serve cached content when the DB is unreachable.
+php artisan app:prime-cache || true
+
 # Ensure storage & bootstrap cache permissions - best effort
 chown -R www-data:www-data /var/www/html || true
 chmod -R 755 /var/www/html/storage || true
