@@ -15,6 +15,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Styles -->
+    <!-- Global debug flag and console silencer for production -->
+    <script>
+        window.APP_DEBUG = @json(config('app.debug'));
+        if (!window.APP_DEBUG) {
+            // Replace console methods with no-ops in production to avoid noisy logs
+            console.log = function() {};
+            console.debug = function() {};
+            console.info = function() {};
+            console.warn = function() {};
+        }
+    </script>
     @php $viteManifestPath = public_path('build/manifest.json'); @endphp
     @if (file_exists($viteManifestPath))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
