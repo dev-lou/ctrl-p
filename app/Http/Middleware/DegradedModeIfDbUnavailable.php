@@ -64,7 +64,24 @@ class DegradedModeIfDbUnavailable
                         logger()->info('DegradedMode: Got featured products', ['count' => $featured->count()]);
                         $featured = collect($featured)->map(fn($p) => new FallbackProduct($p));
                         logger()->info('DegradedMode: Rendering homepage view');
-                        return $this->renderFallbackView('home.homepage', ['featuredProducts' => $featured]);
+                        try {
+                            return $this->renderFallbackView('home.homepage', ['featuredProducts' => $featured]);
+                        } catch (\Throwable $viewError) {
+                            logger()->error('DegradedMode: Homepage view failed, trying minimal fallback', [
+                                'error' => $viewError->getMessage(),
+                                'file' => $viewError->getFile(),
+                                'line' => $viewError->getLine(),
+                            ]);
+                            // Return minimal HTML with products as fallback
+                            $html = '<!DOCTYPE html><html><head><title>Ctrl+P</title></head><body>';
+                            $html .= '<h1>Ctrl+P - Products</h1><p>Homepage in maintenance mode.</p>';
+                            $html .= '<ul>';
+                            foreach ($featured as $product) {
+                                $html .= '<li><a href="/shop/' . ($product->slug ?? '') . '">' . htmlspecialchars($product->name ?? 'Unknown') . '</a> - ₱' . number_format($product->base_price ?? 0, 2) . '</li>';
+                            }
+                            $html .= '</ul></body></html>';
+                            return new Response($html, 200, ['Content-Type' => 'text/html']);
+                        }
                     }
                     
                     // Shop index
