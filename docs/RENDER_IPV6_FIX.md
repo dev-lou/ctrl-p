@@ -78,6 +78,17 @@ Notes
 
 - We updated the app to allow `DB_HOST_IPV4` as an override; setting this env var is effective immediately after redeploy.
 - The best long-term solution is to get the database host to expose an IPv4 address (A record) or move to a provider with IPv4 support.
+ 
+D) Use Supabase REST API fallback (server-side)
+--------------------------------------------
+
+If you cannot expose an IPv4 address for the PostgreSQL endpoint, you can still read data via Supabase's REST API using a server-side key. This repository includes a `SupabaseFallback` service that will fetch `products` and `announcements` via the Supabase REST API when Postgres isn't reachable. To enable this fallback:
+
+1. Add the `SUPABASE_SERVICE_ROLE_KEY` (Supabase service role key) to your Render environment variables.
+2. Optionally set `SUPABASE_ANON_KEY` for client-side usage.
+3. Redeploy your app.
+
+The fallback is limited to read-only operations and is intended to show cached/archive content when Postgres is unreachable.
 
 If you'd like, I can help with:
 - Creating a hardened socat or stunnel proxy (with systemd service and firewall rules) and a small script to monitor/auto-restart.
