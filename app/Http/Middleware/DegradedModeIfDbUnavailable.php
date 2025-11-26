@@ -102,8 +102,17 @@ class DegradedModeIfDbUnavailable
             }
 
             // For all other cases, return static degraded page
+            $staticPath = storage_path('app/public/degraded.html');
+            $publicPath = public_path('degraded.html');
+            
             if (file_exists($staticPath)) {
                 $content = file_get_contents($staticPath);
+                return new Response($content, 503, ['Content-Type' => 'text/html']);
+            }
+            
+            // Fallback to public directory
+            if (file_exists($publicPath)) {
+                $content = file_get_contents($publicPath);
                 return new Response($content, 503, ['Content-Type' => 'text/html']);
             }
 
