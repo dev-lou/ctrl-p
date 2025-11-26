@@ -29,11 +29,44 @@ class AppServiceProvider extends ServiceProvider
             // Attempt a simple connection query
             DB::connection()->getPdo();
         } catch (\Throwable $e) {
-            logger()->warning('Database connection failed during boot - falling back to file session driver: '.$e->getMessage());
-            // Set session driver to file so app remains operational (sessions won't need DB)
-            config(['session.driver' => 'file']);
-            // Also fallback cache to file to avoid database cache queries if configured
-            config(['cache.default' => 'file']);
+            // If the error mentions IPv6 or Network is unreachable, attempt an IPv4 re-resolve
+            $errorMsg = $e->getMessage() ?: '';
+            logger()->warning('Database connection failed during boot: ' . $errorMsg);
+
+            $attemptedRestore = false;
+            if (str_contains($errorMsg, 'Network is unreachable') || str_contains($errorMsg, 'connect') || str_contains($errorMsg, 'Connection timed out')) {
+                try {
+                    $envHost = env('DB_HOST');
+                    if ($envHost && !filter_var($envHost, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                        $resolved = gethostbyname($envHost);
+                        if ($resolved && filter_var($resolved, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                            logger()->info('Resolved DB host to IPv4 during boot. Updating runtime DB host.', ['host' => $envHost, 'ipv4' => $resolved]);
+                            config(['database.connections.pgsql.host' => $resolved]);
+                            // purge existing connection and attempt to reconnect
+                            DB::purge('pgsql');
+                            try {
+                                DB::reconnect('pgsql');
+                                DB::connection('pgsql')->getPdo();
+                                // If successful, don't fallback to file sessions
+                                $attemptedRestore = true;
+                                logger()->info('Reconnected to DB using IPv4 host during boot.');
+                            } catch (\Throwable $reconnectException) {
+                                logger()->warning('Reconnecting with IPv4 host failed: ' . $reconnectException->getMessage());
+                            }
+                        }
+                    }
+                } catch (\Throwable $inner) {
+                    logger()->warning('Failed to attempt IPv4 resolution for DB host: '.$inner->getMessage());
+                }
+            }
+
+            if (! $attemptedRestore) {
+                logger()->warning('Falling back to file session driver (DB unavailable): '.$errorMsg);
+                // Set session driver to file so app remains operational (sessions won't need DB)
+                config(['session.driver' => 'file']);
+                // Also fallback cache to file to avoid database cache queries if configured
+                config(['cache.default' => 'file']);
+            }
         }
         // Ensure pgsql 'options' is always an array to prevent TypeErrors
         // when a `DATABASE_URL` query param named `options` is present

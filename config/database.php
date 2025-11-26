@@ -89,7 +89,29 @@ return [
             // Laravel's URL parser converts query params like `options=endpoint%3D...` into
             // string config values, which breaks PDO (expects 'options' to be an array).
             // Instead, we parse DATABASE_URL manually or use individual DB_* env vars.
-            'host' => env('DB_HOST', '127.0.0.1'),
+            // Prefer an IPv4 address if one is available because some hosts (e.g.,
+            // Supabase) return IPv6 addresses that may not be routable from certain
+            // environments (like Render) and could result in "Network is unreachable".
+            // Allow explicit override via DB_HOST_IPV4 env var.
+            'host' => env('DB_HOST_IPV4') ?: (
+                (function () {
+                    $host = env('DB_HOST', '127.0.0.1');
+                    // If the host is already an IPv4 address, return it directly.
+                    if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                        return $host;
+                    }
+
+                    // Try to resolve an A record (IPv4). `gethostbyname` returns the
+                    // input string if resolution fails - validate the result.
+                    $ip = gethostbyname($host);
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                        return $ip;
+                    }
+
+                    // Otherwise fall back to the configured host.
+                    return $host;
+                })()
+            ),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'neondb'),
             'username' => env('DB_USERNAME', 'neondb_owner'),

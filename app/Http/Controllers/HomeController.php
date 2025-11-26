@@ -15,11 +15,17 @@ class HomeController extends Controller
      */
     public function index(): \Illuminate\View\View
     {
-        // Fetch announcements
-        $announcements = Announcement::published()->pinned()->limit(3)->get();
+        // Fetch announcements (guard against DB failure)
+        try {
+            $announcements = Announcement::published()->pinned()->limit(3)->get();
+        } catch (\Throwable $e) {
+            logger()->warning('Unable to fetch announcements due to DB connectivity: ' . $e->getMessage());
+            $announcements = collect([]);
+        }
 
         // Fetch featured products (newest, with active variants that have stock)
-        $featuredProducts = Product::active()
+        try {
+            $featuredProducts = Product::active()
             ->with('variants')
             ->orderBy('created_at', 'desc')
             ->limit(8)
@@ -31,6 +37,10 @@ class HomeController extends Controller
                     ->where('stock_quantity', '>', 0)
                     ->exists();
             });
+        } catch (\Throwable $e) {
+            logger()->warning('Unable to fetch featured products for HomeController due to DB connectivity: ' . $e->getMessage());
+            $featuredProducts = collect([]);
+        }
 
         return view('home.index', [
             'announcements' => $announcements,
