@@ -102,7 +102,10 @@ RUN composer install \
 # Ensure devDependencies are installed during build so Vite is available
 ENV NODE_ENV=development
 # Install dependencies and build assets (ensure manifest is generated)
-RUN npm ci --no-audit --no-fund --include=dev && npm run build \
+RUN export NPM_CONFIG_PRODUCTION=false \
+    && echo "Node: $(node --version) npm: $(npm --version)" \
+    && npm ci --no-audit --no-fund --include=dev --silent \
+    && npm run build --silent || (echo "ERROR: npm run build failed"; echo "node_modules listing:"; ls -la node_modules || true; echo "build dir listing:"; ls -la public || true; exit 1) \
     && if [ ! -f public/build/manifest.json ]; then echo "ERROR: Vite manifest missing"; ls -la public/build || true; exit 1; fi
 # Set production environment (optional - keeps environment cleaned for PHP runtime)
 ENV NODE_ENV=production
