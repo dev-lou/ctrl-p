@@ -13,6 +13,13 @@ class SupabaseFallback
     {
         $projectRef = config('services.supabase.project_ref');
         $serviceKey = config('services.supabase.service_role_key') ?: config('services.supabase.anon_key');
+        
+        logger()->info('SupabaseFallback::getFromRest called', [
+            'table' => $table,
+            'project_ref_set' => !empty($projectRef),
+            'service_key_set' => !empty($serviceKey),
+        ]);
+        
         if (! $projectRef || ! $serviceKey) {
             logger()->warning('SupabaseFallback: Missing config', ['project_ref' => $projectRef ? 'set' : 'missing', 'key' => $serviceKey ? 'set' : 'missing']);
             return null;
@@ -25,12 +32,32 @@ class SupabaseFallback
             'Accept' => 'application/json',
         ];
 
-        $response = Http::withHeaders($headers)->get($baseUrl, $params);
-        if (! $response->ok()) {
+        logger()->info('SupabaseFallback::getFromRest making request', [
+            'url' => $baseUrl,
+            'params' => $params,
+        ]);
+
+        try {
+            $response = Http::withHeaders($headers)->get($baseUrl, $params);
+            logger()->info('SupabaseFallback::getFromRest response', [
+                'status' => $response->status(),
+                'ok' => $response->ok(),
+            ]);
+            if (! $response->ok()) {
+                logger()->warning('SupabaseFallback::getFromRest response not ok', [
+                    'status' => $response->status(),
+                    'body' => substr($response->body(), 0, 500),
+                ]);
+                return null;
+            }
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            logger()->error('SupabaseFallback::getFromRest exception', [
+                'error' => $e->getMessage(),
+            ]);
             return null;
         }
-
-        return $response->json();
     }
 
     /**
@@ -144,6 +171,8 @@ class SupabaseFallback
 
     public function getProductBySlug(string $slug)
     {
+        logger()->info('SupabaseFallback::getProductBySlug called', ['slug' => $slug]);
+        
         $params = [
             'select' => '*',
             'slug' => 'eq.' . $slug,
@@ -151,17 +180,26 @@ class SupabaseFallback
         ];
 
         $data = $this->getFromRest('products', $params);
+        logger()->info('SupabaseFallback::getProductBySlug REST result', [
+            'slug' => $slug,
+            'data_is_null' => ($data === null),
+            'data_count' => $data ? count($data) : 0,
+        ]);
+        
         if (! $data || count($data) === 0) {
             // Attempt to read local fallback and find by slug
             $local = $this->readLocalFallback('products');
             if ($local) {
                 $found = $local->first(fn($p) => ($p->slug ?? '') === $slug);
                 if ($found) {
+                    logger()->info('SupabaseFallback::getProductBySlug found in local fallback', ['slug' => $slug]);
                     return (object)$found;
                 }
             }
+            logger()->warning('SupabaseFallback::getProductBySlug product not found anywhere', ['slug' => $slug]);
             return null;
         }
+        logger()->info('SupabaseFallback::getProductBySlug returning product', ['slug' => $slug, 'id' => $data[0]['id'] ?? 'no-id']);
         return (object) $data[0];
     }
 
