@@ -174,6 +174,42 @@ class DegradedModeIfDbUnavailable
                     } else {
                         logger()->info('DegradedMode: Did NOT enter product block', ['path' => $path]);
                     }
+                    
+                    // Auth pages - show friendly maintenance message
+                    if (in_array($path, ['login', 'register', 'password/reset', 'password/email'])) {
+                        return $this->renderMaintenancePage('Login & Registration', 
+                            'User accounts and login functionality are temporarily unavailable while we perform maintenance. ' .
+                            'You can still browse our products!',
+                            [['url' => '/', 'text' => 'Go to Homepage'], ['url' => '/shop', 'text' => 'Browse Products']]
+                        );
+                    }
+                    
+                    // Cart page
+                    if ($path === 'cart' || str_starts_with($path, 'cart/')) {
+                        return $this->renderMaintenancePage('Shopping Cart', 
+                            'The shopping cart is temporarily unavailable while we perform maintenance. ' .
+                            'Please try again in a few minutes.',
+                            [['url' => '/', 'text' => 'Go to Homepage'], ['url' => '/shop', 'text' => 'Browse Products']]
+                        );
+                    }
+                    
+                    // Checkout
+                    if (str_starts_with($path, 'checkout')) {
+                        return $this->renderMaintenancePage('Checkout', 
+                            'Checkout is temporarily unavailable while we perform maintenance. ' .
+                            'Your cart items will be preserved. Please try again shortly.',
+                            [['url' => '/', 'text' => 'Go to Homepage'], ['url' => '/shop', 'text' => 'Browse Products']]
+                        );
+                    }
+                    
+                    // Orders
+                    if (str_starts_with($path, 'orders')) {
+                        return $this->renderMaintenancePage('Order History', 
+                            'Order history is temporarily unavailable while we perform maintenance. ' .
+                            'Please try again in a few minutes.',
+                            [['url' => '/', 'text' => 'Go to Homepage'], ['url' => '/shop', 'text' => 'Browse Products']]
+                        );
+                    }
                 } catch (\Throwable $inner) {
                     logger()->warning('DegradedMode: REST fallback attempt failed: ' . $inner->getMessage(), ['path' => $path]);
                 }
@@ -222,5 +258,46 @@ class DegradedModeIfDbUnavailable
             ]);
             throw $e; // Re-throw to be caught by outer handler
         }
+    }
+    
+    /**
+     * Render a user-friendly maintenance page for features that require DB access.
+     */
+    private function renderMaintenancePage(string $title, string $message, array $links = []): Response
+    {
+        $linksHtml = '';
+        foreach ($links as $link) {
+            $linksHtml .= '<a href="' . htmlspecialchars($link['url']) . '" style="display:inline-block;margin:10px 10px 10px 0;padding:12px 24px;background:#3b82f6;color:white;text-decoration:none;border-radius:6px;font-weight:500;">' . htmlspecialchars($link['text']) . '</a>';
+        }
+        
+        $html = '<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>' . htmlspecialchars($title) . ' - Ctrl+P</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: white; border-radius: 16px; padding: 40px; max-width: 500px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        .icon { font-size: 64px; margin-bottom: 20px; }
+        h1 { color: #1f2937; margin-bottom: 16px; font-size: 24px; }
+        p { color: #6b7280; line-height: 1.6; margin-bottom: 24px; }
+        .links { margin-top: 20px; }
+        .status { background: #fef3c7; color: #92400e; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔧</div>
+        <div class="status">Maintenance Mode</div>
+        <h1>' . htmlspecialchars($title) . '</h1>
+        <p>' . htmlspecialchars($message) . '</p>
+        <div class="links">' . $linksHtml . '</div>
+    </div>
+</body>
+</html>';
+        
+        return new Response($html, 503, ['Content-Type' => 'text/html']);
     }
 }
