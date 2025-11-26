@@ -99,7 +99,11 @@ RUN composer install \
 # STEP 7: Install Node.js Dependencies & Build Vite Assets
 # =============================================================================
 # Install Node.js dependencies and build assets
+# Ensure devDependencies are installed during build so Vite is available
+ENV NODE_ENV=development
 RUN npm ci --no-audit --no-fund && npm run build
+# Set production environment (optional - keeps environment cleaned for PHP runtime)
+ENV NODE_ENV=production
 
 # Remove node_modules after build to reduce image size
 RUN rm -rf node_modules
