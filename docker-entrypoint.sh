@@ -12,6 +12,10 @@ php artisan view:clear || true
 php artisan config:clear || true
 php artisan cache:clear || true
 
+# Run database migrations (if DB is reachable)
+echo "Attempting database migrations..."
+php artisan migrate --force 2>&1 || echo "Migration failed or DB unreachable - continuing anyway"
+
 # Try to prime caches for the homepage and home page. This is a best-effort
 # operation that helps the app serve cached content when the DB is unreachable.
 php artisan app:prime-cache || true
