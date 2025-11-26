@@ -40,4 +40,10 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-pro'),
     ],
 
+    'supabase' => [
+        'project_ref' => env('AWS_ACCESS_KEY_ID'), // Supabase project reference (same as used for S3)
+        'service_role_key' => env('SUPABASE_SERVICE_ROLE_KEY'),
+        'anon_key' => env('SUPABASE_ANON_KEY'),
+    ],
+
 ];

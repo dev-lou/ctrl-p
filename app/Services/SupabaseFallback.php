@@ -11,9 +11,10 @@ class SupabaseFallback
      */
     private function getFromRest(string $table, array $params = []): ?array
     {
-        $projectRef = env('AWS_ACCESS_KEY_ID'); // we reuse this as the project ref in env
-        $serviceKey = env('SUPABASE_SERVICE_ROLE_KEY') ?: env('SUPABASE_ANON_KEY');
+        $projectRef = config('services.supabase.project_ref');
+        $serviceKey = config('services.supabase.service_role_key') ?: config('services.supabase.anon_key');
         if (! $projectRef || ! $serviceKey) {
+            logger()->warning('SupabaseFallback: Missing config', ['project_ref' => $projectRef ? 'set' : 'missing', 'key' => $serviceKey ? 'set' : 'missing']);
             return null;
         }
 

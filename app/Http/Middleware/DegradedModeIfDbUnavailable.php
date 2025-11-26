@@ -25,7 +25,7 @@ class DegradedModeIfDbUnavailable
         // If a Supabase REST fallback is configured we allow public pages to proceed
         // so controllers can render content using the REST fallback. This prevents
         // sending a degraded page for routes that can still be served.
-        $hasSupabaseRestFallback = !empty(env('SUPABASE_SERVICE_ROLE_KEY')) || !empty(env('SUPABASE_ANON_KEY'));
+        $hasSupabaseRestFallback = !empty(config('services.supabase.service_role_key')) || !empty(config('services.supabase.anon_key'));
 
         try {
             // Quick DB ping
