@@ -6,6 +6,8 @@ use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Illuminate\Database\QueryException;
+use PDOException;
 
 class Handler extends ExceptionHandler
 {
@@ -35,6 +37,24 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e)
     {
+        // If the database is unreachable (network/connection error) always
+        // render a non-sensitive 503 page instead of throwing a 500.
+        if ($e instanceof QueryException || $e instanceof PDOException) {
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'Network is unreachable') || str_contains($msg, 'SQLSTATE[08006]') || str_contains($msg, 'could not connect')) {
+                logger()->warning('DB connectivity issue handled by global exception: ' . $msg);
+                if ($request->expectsJson()) {
+                    return response()->json(['status' => 'degraded', 'message' => 'DB unreachable'], 503);
+                }
+                // Serve a minimal error page or our degraded.html if present
+                $path = storage_path('app/public/degraded.html');
+                if (file_exists($path)) {
+                    $content = file_get_contents($path);
+                    return response($content, 503)->header('Content-Type', 'text/html');
+                }
+                return response()->view('errors.db-unavailable', [], 503);
+            }
+        }
         // For Vercel serverless: avoid Blade view compilation errors
         if (app()->environment('production') && $request->expectsJson() === false) {
             $statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
