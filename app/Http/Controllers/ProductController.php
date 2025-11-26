@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Services\SupabaseFallback;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProductController extends Controller
 {
@@ -43,7 +46,27 @@ class ProductController extends Controller
         }
 
         // Pagination
-        $products = $query->paginate(12);
+        try {
+            $products = $query->paginate(12);
+        } catch (\Throwable $e) {
+            logger()->warning('ProductController@index: DB unavailable, using Supabase REST fallback: ' . $e->getMessage());
+            $fallback = new SupabaseFallback();
+            $page = max(1, (int) $request->get('page', 1));
+            $limit = 12;
+            $offset = ($page - 1) * $limit;
+            $filters = [];
+            if ($request->has('search') && $request->search) {
+                $filters['search'] = $request->search;
+            }
+            $productsCollection = $fallback->getProducts($filters, $limit, $offset) ?: collect([]);
+            $products = new LengthAwarePaginator(
+                $productsCollection, // items
+                $productsCollection->count(), // total (best-effort)
+                $limit,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
 
         return view('shop.index', [
             'products' => $products,
@@ -61,23 +84,45 @@ class ProductController extends Controller
     public function show(Product $product): \Illuminate\View\View
     {
         // Load relationships
-        $product->load(['variants']);
+        try {
+            $product->load(['variants']);
+        } catch (\Throwable $e) {
+            logger()->warning('ProductController@show: DB unavailable, using Supabase REST fallback: ' . $e->getMessage());
+            // Try to fetch via REST fallback using slug
+            $fallback = new SupabaseFallback();
+            $remote = $fallback->getProductBySlug($product->slug);
+            if ($remote) {
+                // Map remote object into a pseudo-product object for the view
+                $product = $remote;
+                $product->variants = $fallback->getVariantsForProduct($product->id) ?: collect([]);
+            }
+        }
 
         // Get reviews with pagination
-        $reviews = $product->reviews()
+        try {
+            $reviews = $product->reviews()
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        } catch (\Throwable $e) {
+            logger()->warning('ProductController@show: reviews unavailable: ' . $e->getMessage());
+            $reviews = collect([]);
+        }
 
         // Calculate average rating
         $averageRating = $product->averageRating();
 
         // Get related products (active only)
-        $relatedProducts = Product::query()
+        try {
+            $relatedProducts = Product::query()
             ->active()
             ->where('id', '!=', $product->id)
             ->limit(4)
             ->get();
+        } catch (\Throwable $e) {
+            logger()->warning('ProductController@show: related products fallback: ' . $e->getMessage());
+            $relatedProducts = Cache::get('home.featured_products', collect([]));
+        }
 
         // Check if current user can review (authenticated and has completed order)
         $canReview = false;

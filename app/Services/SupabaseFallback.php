@@ -73,4 +73,64 @@ class SupabaseFallback
             return (object) $item;
         });
     }
+
+    // Generic product list with pagination support (offset + limit)
+    public function getProducts(array $filters = [], int $limit = 12, int $offset = 0)
+    {
+        // Build params for supabase REST
+        $params = [
+            'select' => 'id,name,slug,description,base_price,image_path,current_stock,status,created_at',
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+
+        if (isset($filters['status'])) {
+            $params['status'] = 'eq.' . $filters['status'];
+        }
+        if (isset($filters['search'])) {
+            $params['name'] = 'ilike.*' . $filters['search'] . '*';
+        }
+        if (isset($filters['order'])) {
+            $params['order'] = $filters['order'];
+        }
+
+        $data = $this->getFromRest('products', $params);
+        if (! $data) {
+            return null;
+        }
+        return collect($data)->map(function ($item) {
+            return (object) $item;
+        });
+    }
+
+    public function getProductBySlug(string $slug)
+    {
+        $params = [
+            'select' => '*',
+            'slug' => 'eq.' . $slug,
+            'limit' => 1,
+        ];
+
+        $data = $this->getFromRest('products', $params);
+        if (! $data || count($data) === 0) {
+            return null;
+        }
+        return (object) $data[0];
+    }
+
+    public function getVariantsForProduct(int $productId)
+    {
+        $params = [
+            'select' => '*',
+            'product_id' => 'eq.' . $productId,
+        ];
+
+        $data = $this->getFromRest('product_variants', $params);
+        if (! $data) {
+            return null;
+        }
+        return collect($data)->map(function ($item) {
+            return (object) $item;
+        });
+    }
 }

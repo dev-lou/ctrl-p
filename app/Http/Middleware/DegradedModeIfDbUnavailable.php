@@ -20,13 +20,31 @@ class DegradedModeIfDbUnavailable
             return $next($request);
         }
 
+        // If a Supabase REST fallback is configured we allow public pages to proceed
+        // so controllers can render content using the REST fallback. This prevents
+        // sending a degraded page for routes that can still be served.
+        $hasSupabaseRestFallback = !empty(env('SUPABASE_SERVICE_ROLE_KEY'));
+
         try {
             // Quick DB ping
             DB::select('SELECT 1');
             return $next($request);
         } catch (\Throwable $e) {
+            // Enhanced log: include incoming IP and path for debugging on Render
+            logger()->warning('DegradedMode: DB unreachable during request', [
+                'path' => $path,
+                'ip' => $request->ip(),
+                'exception' => $e->getMessage(),
+            ]);
             // If DB unreachable, return the static degraded HTML if it exists.
             $staticPath = storage_path('app/public/degraded.html');
+            if ($hasSupabaseRestFallback) {
+                // When the Supabase REST fallback key exists, allow requests to proceed
+                // so controllers can use REST fallback to render content.
+                logger()->info('DegradedMode: allowing request to continue due to SUPABASE_SERVICE_ROLE_KEY', ['path' => $path]);
+                return $next($request);
+            }
+
             if (file_exists($staticPath)) {
                 $content = file_get_contents($staticPath);
                 return new Response($content, 503, ['Content-Type' => 'text/html']);
