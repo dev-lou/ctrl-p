@@ -6,6 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Response;
+use App\Services\SupabaseFallback;
+use App\DTO\FallbackProduct;
 
 class DegradedModeIfDbUnavailable
 {
@@ -51,8 +53,45 @@ class DegradedModeIfDbUnavailable
             // If DB unreachable, return the static degraded HTML if it exists.
             $staticPath = storage_path('app/public/degraded.html');
             if ($hasSupabaseRestFallback) {
-                // When the Supabase REST fallback key exists, allow requests to proceed
-                // so controllers can use REST fallback to render content.
+                // When the Supabase REST fallback key exists try to render common public pages
+                // directly from Supabase REST to avoid controller DB queries and handler 503s.
+                try {
+                    $fallback = new SupabaseFallback();
+                    // Home page
+                    if ($path === '' || $path === '/') {
+                        $featured = $fallback->getFeaturedProducts(6) ?: collect([]);
+                        $featured = collect($featured)->map(fn($p) => new FallbackProduct($p));
+                        return response()->view('home.homepage', ['featuredProducts' => $featured]);
+                    }
+                    // Shop index
+                    if ($path === 'shop' || $path === 'shop/') {
+                        // Collect parameters
+                        $page = max(1, (int) $request->get('page', 1));
+                        $limit = 12;
+                        $offset = ($page - 1) * $limit;
+                        $filters = [];
+                        if ($request->has('search')) $filters['search'] = $request->search;
+                        if ($request->has('sort')) $filters['order'] = $request->get('sort');
+                        $products = $fallback->getProducts($filters, $limit, $offset) ?: collect([]);
+                        $products = $products->map(fn($p) => new FallbackProduct($p));
+                        return response()->view('shop.index', ['products' => $products]);
+                    }
+                    // Shop product show (/shop/{slug})
+                    if (str_starts_with($path, 'shop/') && count($request->segments()) >= 2) {
+                        $slug = $request->segment(2);
+                        $remote = $fallback->getProductBySlug($slug);
+                        if ($remote) {
+                            $product = new FallbackProduct($remote);
+                            $variants = $fallback->getVariantsForProduct($product->id) ?: collect([]);
+                            $product->variants = collect($variants)->map(fn($v) => (object)$v);
+                            return response()->view('shop.show', ['product' => $product]);
+                        }
+                    }
+                } catch (\Throwable $inner) {
+                    logger()->warning('DegradedMode: REST fallback attempt failed: ' . $inner->getMessage(), ['path' => $path]);
+                }
+
+                // If direct REST rendering failed, allow request to continue to controllers
                 logger()->info('DegradedMode: allowing request to continue due to SUPABASE_SERVICE_ROLE_KEY', ['path' => $path]);
                 return $next($request);
             }
