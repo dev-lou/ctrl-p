@@ -49,17 +49,21 @@ class DegradedModeIfDbUnavailable
             if ($hasSupabaseRestFallback) {
                 // When the Supabase REST fallback key exists try to render common public pages
                 // directly from Supabase REST to avoid controller DB queries and handler 503s.
-                logger()->info('DegradedMode: Attempting REST fallback', ['path' => $path]);
+                logger()->info('DegradedMode: Attempting REST fallback', ['path' => $path, 'path_length' => strlen($path), 'is_root' => ($path === '' || $path === '/')]);
                 try {
                     $fallback = new SupabaseFallback();
                     
-                    // Home page
+                    // Home page (root path is empty string in Laravel)
                     if ($path === '' || $path === '/') {
                         logger()->info('DegradedMode: Fetching featured products for homepage');
-                        $featured = $fallback->getFeaturedProducts(6) ?: collect([]);
+                        $featured = $fallback->getFeaturedProducts(6);
+                        if ($featured === null) {
+                            logger()->warning('DegradedMode: getFeaturedProducts returned null');
+                            throw new \Exception('REST API returned null');
+                        }
                         logger()->info('DegradedMode: Got featured products', ['count' => $featured->count()]);
                         $featured = collect($featured)->map(fn($p) => new FallbackProduct($p));
-                        // Share default order counts to prevent View composer DB queries
+                        logger()->info('DegradedMode: Rendering homepage view');
                         return $this->renderFallbackView('home.homepage', ['featuredProducts' => $featured]);
                     }
                     
