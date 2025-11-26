@@ -7,15 +7,26 @@ use Illuminate\Support\Str;
 | Session Driver Fallback
 |--------------------------------------------------------------------------
 | When DB is unreachable (e.g., IPv6-only Supabase + IPv4-only Render), we
-| fallback to file-based sessions so the app can still serve public pages.
+| fallback to cookie-based sessions so the app can still serve pages.
+|
+| Since config files are loaded before DB connections are tested, we check
+| if Supabase REST keys are set as an indicator that we're in "fallback mode"
+| and should use cookie sessions to avoid DB dependency.
 */
 $sessionDriver = env('SESSION_DRIVER', 'database');
+
+// If SESSION_DRIVER is 'database' but we have Supabase REST keys configured,
+// it means we expect the DB to potentially be unreachable (IPv6 issue).
+// In this case, prefer 'cookie' to avoid session middleware failures.
 if ($sessionDriver === 'database') {
-    // Quick check if DB is likely reachable - if env says database but we
-    // can't connect, the session middleware will fail. AppServiceProvider
-    // will override this at runtime if needed, but we can do a fast check here.
-    // Actually, config files run before DB is connected, so we can't test here.
-    // The fallback is handled in AppServiceProvider boot().
+    $hasSupabaseRestFallback = !empty(env('SUPABASE_SERVICE_ROLE_KEY')) || !empty(env('SUPABASE_ANON_KEY'));
+    if ($hasSupabaseRestFallback) {
+        // Check if DB host is a Supabase host (known IPv6 issue with Render)
+        $dbHost = env('DB_HOST', '');
+        if (str_contains($dbHost, 'supabase.co')) {
+            $sessionDriver = 'cookie'; // Fallback to cookie sessions
+        }
+    }
 }
 
 return [
@@ -34,7 +45,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => $sessionDriver,
 
     /*
     |--------------------------------------------------------------------------

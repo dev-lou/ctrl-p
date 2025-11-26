@@ -1,5 +1,23 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| Queue Connection Fallback for Supabase IPv6 Issues
+|--------------------------------------------------------------------------
+| When using Supabase (IPv6-only) with Render (IPv4-only), the database
+| queue driver will fail. Auto-fallback to 'sync' when this is detected.
+*/
+$queueConnection = env('QUEUE_CONNECTION', 'database');
+if ($queueConnection === 'database') {
+    $hasSupabaseRestFallback = !empty(env('SUPABASE_SERVICE_ROLE_KEY')) || !empty(env('SUPABASE_ANON_KEY'));
+    if ($hasSupabaseRestFallback) {
+        $dbHost = env('DB_HOST', '');
+        if (str_contains($dbHost, 'supabase.co')) {
+            $queueConnection = 'sync'; // Fallback to sync queue
+        }
+    }
+}
+
 return [
 
     /*
@@ -13,7 +31,7 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'database'),
+    'default' => $queueConnection,
 
     /*
     |--------------------------------------------------------------------------

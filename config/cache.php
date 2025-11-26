@@ -2,6 +2,24 @@
 
 use Illuminate\Support\Str;
 
+/*
+|--------------------------------------------------------------------------
+| Cache Store Fallback for Supabase IPv6 Issues
+|--------------------------------------------------------------------------
+| When using Supabase (IPv6-only) with Render (IPv4-only), the database
+| cache driver will fail. Auto-fallback to 'file' when this is detected.
+*/
+$cacheStore = env('CACHE_STORE', 'database');
+if ($cacheStore === 'database') {
+    $hasSupabaseRestFallback = !empty(env('SUPABASE_SERVICE_ROLE_KEY')) || !empty(env('SUPABASE_ANON_KEY'));
+    if ($hasSupabaseRestFallback) {
+        $dbHost = env('DB_HOST', '');
+        if (str_contains($dbHost, 'supabase.co')) {
+            $cacheStore = 'file'; // Fallback to file cache
+        }
+    }
+}
+
 return [
 
     /*
@@ -15,7 +33,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => $cacheStore,
 
     /*
     |--------------------------------------------------------------------------
