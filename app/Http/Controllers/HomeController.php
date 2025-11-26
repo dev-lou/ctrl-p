@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Announcement;
+use App\Services\SupabaseFallback;
+use App\DTO\FallbackProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -23,7 +25,20 @@ class HomeController extends Controller
             });
         } catch (\Throwable $e) {
             logger()->warning('Unable to fetch announcements due to DB connectivity: ' . $e->getMessage());
-            $announcements = Cache::get('home.announcements', collect([]));
+            // Try the Supabase REST fallback
+            try {
+                $fallback = new SupabaseFallback();
+                $remote = $fallback->getAnnouncements(3);
+                if ($remote && $remote->isNotEmpty()) {
+                    $announcements = $remote;
+                    Cache::put('home.announcements', $remote, now()->addMinutes(10));
+                } else {
+                    $announcements = Cache::get('home.announcements', collect([]));
+                }
+            } catch (\Throwable $inner) {
+                logger()->warning('Supabase REST fallback for announcements failed: ' . $inner->getMessage());
+                $announcements = Cache::get('home.announcements', collect([]));
+            }
         }
 
         // Fetch featured products (newest, with active variants that have stock)
@@ -44,7 +59,19 @@ class HomeController extends Controller
             });
         } catch (\Throwable $e) {
             logger()->warning('Unable to fetch featured products for HomeController due to DB connectivity: ' . $e->getMessage());
-            $featuredProducts = Cache::get('home.featured_products', collect([]));
+            try {
+                $fallback = new SupabaseFallback();
+                $remote = $fallback->getFeaturedProducts(8);
+                if ($remote && $remote->isNotEmpty()) {
+                    $featuredProducts = $remote->map(fn($p) => new \App\DTO\FallbackProduct($p));
+                    Cache::put('home.featured_products', $remote, now()->addMinutes(10));
+                } else {
+                    $featuredProducts = Cache::get('home.featured_products', collect([]));
+                }
+            } catch (\Throwable $inner) {
+                logger()->warning('Supabase REST fallback for featured products failed: ' . $inner->getMessage());
+                $featuredProducts = Cache::get('home.featured_products', collect([]));
+            }
         }
 
         return view('home.index', [

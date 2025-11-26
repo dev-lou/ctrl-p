@@ -412,7 +412,9 @@
             <div class="product-grid">
                 <!-- Product Image -->
                 <div class="product-image-wrapper">
-                    @if($product->image_path)
+                    @if(!empty($product->image_url))
+                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    @elseif($product->image_path)
                         <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;">
                     @else
                         <div class="product-image-placeholder">No Image</div>

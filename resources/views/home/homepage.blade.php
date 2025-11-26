@@ -611,7 +611,9 @@
                         <div class="product-card disabled reveal-on-scroll" data-reveal-delay="{{ ($loop->index % 4) * 100 }}">
                     @endif
                         <div class="product-image">
-                            @if(!empty($product?->image_path))
+                            @if(!empty($product?->image_url))
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name ?? 'Product' }}">
+                            @elseif(!empty($product?->image_path))
                                 <img src="{{ asset('storage/' . ($product?->image_path ?? '')) }}" alt="{{ $product?->name ?? 'Product' }}">
                             @else
                                 <span>No Image</span>

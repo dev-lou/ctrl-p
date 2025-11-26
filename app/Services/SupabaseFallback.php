@@ -46,12 +46,27 @@ class SupabaseFallback
 
         $data = $this->getFromRest('products', $params);
         if (! $data) {
+            // Try local fallback file
+            $local = $this->readLocalFallback('products');
+            if ($local) {
+                return $local->take($limit);
+            }
             return null;
         }
 
         // Convert arrays to stdClass objects for compatibility in views
+        // Convert items to objects and ensure image_url property is added
         return collect($data)->map(function ($item) {
-            return (object) $item;
+            $obj = (object) $item;
+            // If Supabase uses path in image_path, but we want full URL, try to convert
+            if (isset($obj->image_path) && $obj->image_path && str_starts_with($obj->image_path, 'http')) {
+                $obj->image_url = $obj->image_path;
+                unset($obj->image_path);
+            }
+            // Ensure numeric casts
+            $obj->base_price = isset($obj->base_price) ? (float)$obj->base_price : 0.0;
+            $obj->current_stock = isset($obj->current_stock) ? (int)$obj->current_stock : 0;
+            return $obj;
         });
     }
 
@@ -66,6 +81,10 @@ class SupabaseFallback
 
         $data = $this->getFromRest('announcements', $params);
         if (! $data) {
+            $local = $this->readLocalFallback('announcements');
+            if ($local) {
+                return $local->take($limit);
+            }
             return null;
         }
 
@@ -127,10 +146,29 @@ class SupabaseFallback
 
         $data = $this->getFromRest('product_variants', $params);
         if (! $data) {
+            // No local fallback for variants currently
             return null;
         }
         return collect($data)->map(function ($item) {
             return (object) $item;
         });
+    }
+
+    private function readLocalFallback(string $type)
+    {
+        try {
+            $path = storage_path("app/public/fallback/{$type}.json");
+            if (!file_exists($path)) {
+                return null;
+            }
+            $content = file_get_contents($path);
+            if (! $content) return null;
+            $json = json_decode($content, true);
+            if (! $json) return null;
+            return collect($json)->map(fn($i) => (object)$i);
+        } catch (\Throwable $e) {
+            logger()->warning('Failed reading local fallback ' . $type . ': ' . $e->getMessage());
+            return null;
+        }
     }
 }

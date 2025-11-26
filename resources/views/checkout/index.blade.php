@@ -403,7 +403,9 @@
                                 <div class="space-y-3">
                                     @foreach ($items as $item)
                                         <div class="order-item">
-                                            @if ($item['product']->image_path)
+                                            @if (!empty($item['product']->image_url))
+                                                <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" class="order-item-image">
+                                            @elseif ($item['product']->image_path)
                                                 <img src="{{ asset('storage/' . $item['product']->image_path) }}" alt="{{ $item['product']->name }}" class="order-item-image">
                                             @else
                                                 <div class="order-item-image flex items-center justify-center">
