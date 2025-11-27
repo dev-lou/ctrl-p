@@ -1,6 +1,28 @@
 <x-admin-layout>
     @section('page-title', 'Inventory Management')
 
+    <!-- Flash Messages -->
+    @if(session('success'))
+        <div style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); border: 2px solid #66bb6a; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px;">✅</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ session('success') }}</span>
+        </div>
+    @endif
+    
+    @if(session('warning'))
+        <div style="background: linear-gradient(135deg, #ff9500 0%, #cc7700 100%); border: 2px solid #ffd700; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px;">⚠️</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ session('warning') }}</span>
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div style="background: linear-gradient(135deg, #f44336 0%, #c62828 100%); border: 2px solid #ef5350; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px;">❌</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <!-- Header Section -->
     <div class="mb-8 flex items-center justify-between">
         <div>
