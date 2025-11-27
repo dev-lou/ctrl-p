@@ -7,40 +7,28 @@ if [ -f /var/www/html/public/build/.vite/manifest.json ] && [ ! -f /var/www/html
   echo "Copied Vite manifest from .vite/manifest.json to public/build/manifest.json"
 fi
 
-# Clear ALL caches to ensure fresh config is used
-echo "Clearing all caches..."
-php artisan config:clear || true
-php artisan cache:clear || true
-php artisan view:clear || true
-php artisan route:clear || true
+# Clear caches quickly (no DB required)
+echo "Clearing caches..."
 rm -f bootstrap/cache/config.php || true
 rm -f bootstrap/cache/routes-v7.php || true
+rm -f bootstrap/cache/packages.php || true
+rm -f bootstrap/cache/services.php || true
 
-# Run database migrations (if DB is reachable)
-# If tables already exist (e.g., imported from another DB), this is expected to fail
-# We check if migrations table exists; if not, we assume fresh DB and run migrations
-echo "Checking database state..."
-MIGRATE_STATUS=$(php artisan migrate:status 2>&1) || true
-
-if echo "$MIGRATE_STATUS" | grep -q "Migration table not found"; then
-    echo "Fresh database detected, running migrations..."
-    php artisan migrate --force 2>&1 || echo "Migration failed - continuing anyway"
-elif echo "$MIGRATE_STATUS" | grep -q "Pending"; then
-    echo "Pending migrations found, running them..."
-    php artisan migrate --force 2>&1 || echo "Migration failed - continuing anyway"
-else
-    echo "Database already migrated or tables exist - skipping migrations"
-fi
-
-# Try to prime caches for the homepage. This is a best-effort
-# operation that helps the app serve cached content when the DB is unreachable.
-# Note: `app:prime-cache` command may not exist in every build; remove it to avoid build noise.
-# (Optional) If you add a prime-cache command in the future, re-enable it here.
-
-# Ensure storage & bootstrap cache permissions - best effort
+# Ensure storage & bootstrap cache permissions
 chown -R www-data:www-data /var/www/html || true
 chmod -R 755 /var/www/html/storage || true
 chmod -R 755 /var/www/html/bootstrap/cache || true
 
-# Finally launch Apache in the foreground
+# Run migrations in background with timeout to not block startup
+# This allows Apache to start immediately and pass health checks
+echo "Starting migrations in background..."
+(
+  sleep 5  # Wait for Apache to start first
+  echo "Running migrations..."
+  timeout 30 php artisan migrate --force 2>&1 || echo "Migration skipped or failed"
+  echo "Background migration task complete"
+) &
+
+# Launch Apache in the foreground immediately
+echo "Starting Apache..."
 exec "$@"
