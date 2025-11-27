@@ -207,7 +207,7 @@
                     @foreach($lowStockProducts as $product)
                         <div class="flex items-center gap-3 p-3 rounded-lg transition-all duration-300" style="background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(255, 255, 255, 0.2);" onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'; this.style.borderColor='rgba(255, 255, 255, 0.4)'; this.style.transform='translateX(4px)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'; this.style.borderColor='rgba(255, 255, 255, 0.2)'; this.style.transform='translateX(0)'">
                             @if($product->image_path)
-                                <img src="{{ Str::startsWith($product->image_path, 'http') ? $product->image_path : (Str::startsWith($product->image_path, '/storage') ? asset($product->image_path) : asset('storage/' . $product->image_path)) }}" alt="{{ $product->name }}" class="w-14 h-14 rounded-lg object-cover" style="border: 2px solid rgba(255, 255, 255, 0.3);">
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-14 h-14 rounded-lg object-cover" style="border: 2px solid rgba(255, 255, 255, 0.3);">
                             @else
                                 <div class="w-14 h-14 rounded-lg flex items-center justify-center" style="background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255, 255, 255, 0.3);">
                                     <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

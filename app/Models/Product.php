@@ -100,6 +100,29 @@ class Product extends Model
     }
 
     /**
+     * Get the full image URL, handling both external URLs and local storage paths.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image_path)) {
+            return null;
+        }
+        
+        // If already a full URL, return as-is
+        if (str_starts_with($this->image_path, 'http')) {
+            return $this->image_path;
+        }
+        
+        // If starts with /storage, use asset() directly
+        if (str_starts_with($this->image_path, '/storage')) {
+            return asset($this->image_path);
+        }
+        
+        // Otherwise, prepend storage/
+        return asset('storage/' . $this->image_path);
+    }
+
+    /**
      * Get total stock from all active variants.
      */
     public function getTotalStockFromVariants(): int

@@ -436,7 +436,7 @@
                                                 <div class="flex items-center gap-4">
                                                     <div class="product-image-container" style="width: 80px; height: 80px;">
                                                         @if ($item['product']->image_path)
-                                                            <img src="{{ Str::startsWith($item['product']->image_path, 'http') ? $item['product']->image_path : (Str::startsWith($item['product']->image_path, '/storage') ? asset($item['product']->image_path) : asset('storage/' . $item['product']->image_path)) }}" alt="{{ $item['product']->name }}">
+                                                            <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}">
                                                         @else
                                                             <div class="product-placeholder">
                                                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -492,7 +492,7 @@
                                 <div class="flex gap-4 items-start">
                                     <div class="product-image-container" style="width: 80px; height: 80px;">
                                         @if ($item['product']->image_path)
-                                            <img src="{{ Str::startsWith($item['product']->image_path, 'http') ? $item['product']->image_path : (Str::startsWith($item['product']->image_path, '/storage') ? asset($item['product']->image_path) : asset('storage/' . $item['product']->image_path)) }}" alt="{{ $item['product']->name }}">
+                                            <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}">
                                         @else
                                             <div class="product-placeholder">
                                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -551,7 +551,7 @@
                                         <!-- Product Image -->
                                         <div class="product-image-container">
                                             @if ($item['product']->image_path)
-                                                <img src="{{ Str::startsWith($item['product']->image_path, 'http') ? $item['product']->image_path : (Str::startsWith($item['product']->image_path, '/storage') ? asset($item['product']->image_path) : asset('storage/' . $item['product']->image_path)) }}" alt="{{ $item['product']->name }}">
+                                                <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}">
                                             @else
                                                 <div class="product-placeholder">
                                                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -415,7 +415,7 @@
                     @if(!empty($product->image_url))
                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;">
                     @elseif($product->image_path)
-                        <img src="{{ Str::startsWith($product->image_path, 'http') ? $product->image_path : (Str::startsWith($product->image_path, '/storage') ? asset($product->image_path) : asset('storage/' . $product->image_path)) }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;">
                     @else
                         <div class="product-image-placeholder">No Image</div>
                     @endif
@@ -542,7 +542,7 @@
                             <a href="{{ route('shop.show', $related->slug) }}" class="related-card">
                                 <div class="related-image">
                                     @if($related->image_path)
-                                        <img src="{{ Str::startsWith($related->image_path, 'http') ? $related->image_path : (Str::startsWith($related->image_path, '/storage') ? asset($related->image_path) : asset('storage/' . $related->image_path)) }}" alt="{{ $related->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="{{ $related->image_url }}" alt="{{ $related->name }}" style="width: 100%; height: 100%; object-fit: cover;">
                                     @endif
                                 </div>
                                 <div class="related-info">

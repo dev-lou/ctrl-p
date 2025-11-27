@@ -693,7 +693,7 @@
 
             <label for="imageInput" id="imagePreview" style="width: 100%; aspect-ratio: 1; background: rgba(15, 23, 42, 0.6); border: 2px dashed rgba(100, 116, 139, 0.5); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-bottom: 16px; overflow: hidden; transition: all 0.25s ease;" onmouseover="this.style.borderColor='#3b82f6'; this.style.backgroundColor='rgba(59, 130, 246, 0.05)'; this.style.boxShadow='0 0 20px rgba(59, 130, 246, 0.15)'; this.style.transform='scale(1.01)';" onmouseout="this.style.borderColor='rgba(100, 116, 139, 0.5)'; this.style.backgroundColor='rgba(15, 23, 42, 0.6)'; this.style.boxShadow='none'; this.style.transform='scale(1)';">
                 @if ($product->image_path)
-                    <img src="{{ Str::startsWith($product->image_path, 'http') ? $product->image_path : (Str::startsWith($product->image_path, '/storage') ? asset($product->image_path) : asset('storage/' . $product->image_path)) }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;" />
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;" />
                 @else
                     <div style="text-align: center;">
                         <div style="font-size: 56px; margin-bottom: 12px; opacity: 0.7;">📸</div>

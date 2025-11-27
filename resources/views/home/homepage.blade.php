@@ -614,7 +614,7 @@
                             @if(!empty($product?->image_url))
                                 <img src="{{ $product->image_url }}" alt="{{ $product->name ?? 'Product' }}">
                             @elseif(!empty($product?->image_path))
-                                <img src="{{ Str::startsWith($product->image_path, 'http') ? $product->image_path : (Str::startsWith($product->image_path, '/storage') ? asset($product->image_path) : asset('storage/' . $product->image_path)) }}" alt="{{ $product?->name ?? 'Product' }}">
+                                <img src="{{ $product->image_url }}" alt="{{ $product?->name ?? 'Product' }}">
                             @else
                                 <span>No Image</span>
                             @endif

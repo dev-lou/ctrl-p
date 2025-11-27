@@ -208,7 +208,7 @@
                             <td class="px-6 py-4">
                                 <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 2px solid #2a3f5f; background: #0f1419;">
                                     @if ($product->image_path)
-                                        <img src="{{ Str::startsWith($product->image_path, 'http') ? $product->image_path : (Str::startsWith($product->image_path, '/storage') ? asset($product->image_path) : asset('storage/' . $product->image_path)) }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;" />
+                                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;" />
                                     @else
                                         <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">📦</div>
                                     @endif

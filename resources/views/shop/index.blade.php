@@ -235,7 +235,7 @@
                             @if(!empty($product->image_url))
                                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="product-image">
                             @elseif(!empty($product->image_path))
-                                <img src="{{ Str::startsWith($product->image_path, 'http') ? $product->image_path : (Str::startsWith($product->image_path, '/storage') ? asset($product->image_path) : asset('storage/' . $product->image_path)) }}" alt="{{ $product->name }}" class="product-image">
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="product-image">
                             @else
                                 <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #AAAAAA; font-size: 14px; font-weight: 500;">
                                     No Image
