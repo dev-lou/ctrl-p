@@ -14,9 +14,10 @@ class GeminiChatService
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key');
-        $this->model = config('services.gemini.model', 'gemini-pro');
-        // Using v1 API endpoint
-        $this->apiUrl = "https://generativelanguage.googleapis.com/v1/models/{$this->model}:generateContent";
+        // Use gemini-1.5-flash (gemini-pro is deprecated)
+        $this->model = config('services.gemini.model', 'gemini-2.0-flash');
+        // Using v1beta API endpoint for newer models
+        $this->apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent";
     }
 
     /**
@@ -89,7 +90,7 @@ class GeminiChatService
                 
                 return [
                     'success' => false,
-                    'error' => 'Sorry, I\'m having trouble connecting right now. Please try again later.',
+                    'error' => 'CICT AI is not available right now. Please try again later.',
                 ];
             }
 

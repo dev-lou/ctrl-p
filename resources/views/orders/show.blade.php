@@ -287,11 +287,11 @@
                         </div>
 
                         <!-- Service Requests -->
-                        @if (!empty($order->serviceRequests) && $order->serviceRequests->count() > 0)
+                        @if (method_exists($order, 'serviceRequests') && $order->relationLoaded('serviceRequests') && $order->serviceRequests->count() > 0)
                             <div class="order-card p-8">
                                 <h2 class="order-text text-2xl font-bold mb-6" style="font-size: 1.75rem; letter-spacing: -0.5px;">🔧 Service Requests</h2>
                                 <div class="space-y-4">
-                                    @foreach ($order->serviceRequests ?? [] as $service)
+                                    @foreach ($order->serviceRequests as $service)
                                         <div class="pb-4 border-b border-gray-200 last:border-0">
                                             <div class="flex justify-between items-start mb-3">
                                                 <h3 class="order-text font-bold text-lg">{{ $service->service_type }}</h3>

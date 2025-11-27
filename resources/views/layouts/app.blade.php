@@ -386,7 +386,7 @@
                     console.error('Chat error:', error);
                     this.messages.push({
                         type: 'bot',
-                        text: 'Sorry, I\'m having trouble connecting. Please try again later.',
+                        text: 'CICT AI is not available right now. Please try again later.',
                         time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                     });
                 } finally {

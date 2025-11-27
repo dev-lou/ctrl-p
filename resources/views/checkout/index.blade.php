@@ -1,5 +1,5 @@
 <x-app-layout :title="'Checkout - CICT Merch'">
-    <div style="background: #FFFAF1; min-height: 100vh; width: 100%; padding-top: 100px;">
+    <div style="background: #FFFAF1; min-height: 100vh; width: 100%; padding-top: 80px;">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
 
@@ -373,8 +373,8 @@
         }
     </style>
 
-    <div style="background: #FFFAF1; min-height: 100vh; width: 100%; padding-top: 60px;">
-        <div class="py-6 mt-12">
+    <div style="background: #FFFAF1; min-height: 100vh; width: 100%;">
+        <div class="py-4 mt-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <div class="checkout-header">

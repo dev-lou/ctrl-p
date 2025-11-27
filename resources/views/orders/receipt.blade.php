@@ -427,7 +427,7 @@
                 </div>
 
                 <!-- Service Requests (if any) -->
-                @if($order->serviceRequests->count() > 0)
+                @if(method_exists($order, 'serviceRequests') && $order->serviceRequests && $order->serviceRequests->count() > 0)
                     <div style="margin: 24px 0; padding: 16px; background: #F9F9F9; border-left: 4px solid #8B0000; border-radius: 4px;">
                         <h3 class="section-title" style="margin-top: 0;">🔧 Printing & Customization Services</h3>
                         @foreach($order->serviceRequests as $service)

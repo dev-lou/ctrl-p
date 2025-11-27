@@ -669,12 +669,6 @@
                                 </a>
                             @endauth
 
-                            <div class="mt-6 p-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-lg">
-                                <p class="cart-label text-xs md:text-sm text-center">
-                                    📍 Pickup Only<br>
-                                    <span class="text-xs text-orange-700 mt-1 block">Please arrange pickup at the <br>CICT Student Council Office</span>
-                                </p>
-                            </div>
                         </div>
                     </div>
 
