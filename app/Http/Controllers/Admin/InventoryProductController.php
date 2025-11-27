@@ -177,12 +177,23 @@ class InventoryProductController extends Controller
                     'disk' => 'supabase',
                     'endpoint' => env('AWS_ENDPOINT'),
                     'bucket' => env('AWS_BUCKET'),
+                    'aws_key' => env('AWS_ACCESS_KEY_ID') ? substr(env('AWS_ACCESS_KEY_ID'), 0, 8) . '...' : 'NOT SET',
+                    'aws_url' => env('AWS_URL'),
                 ]);
 
                 // Upload to Supabase Storage using the 'supabase' disk
-                $uploaded = Storage::disk('supabase')->put($storagePath, file_get_contents($file), 'public');
+                $disk = Storage::disk('supabase');
+                $uploaded = $disk->put($storagePath, file_get_contents($file), 'public');
+                
+                // Verify the file was actually uploaded
+                $fileExists = $disk->exists($storagePath);
+                
+                \Log::info('Upload result', [
+                    'put_returned' => $uploaded,
+                    'file_exists_check' => $fileExists,
+                ]);
 
-                if ($uploaded) {
+                if ($uploaded && $fileExists) {
                     // Build the public URL for the uploaded image
                     // Format: https://<project-ref>.supabase.co/storage/v1/object/public/<bucket>/<path>
                     $imagePath = env('AWS_URL') . '/' . $storagePath;
