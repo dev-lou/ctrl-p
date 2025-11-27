@@ -313,11 +313,12 @@ class InventoryProductController extends Controller
      */
     public function update(Request $request, Product $product): \Illuminate\Http\RedirectResponse
     {
-        try {
         \Log::info('Update method called for product', ['product_id' => $product->id, 'product_name' => $product->name]);
-        \Log::info('Request data', ['all_data' => $request->all()]);
         
-        $validated = $request->validate([
+        try {
+            \Log::info('Request data', ['all_data' => $request->all()]);
+            
+            $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'base_price' => 'required|numeric|min:0',

@@ -110,7 +110,15 @@ class Handler extends ExceptionHandler
                 'exception' => get_class($e),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
+                'url' => $request->fullUrl(),
             ]);
+            
+            // For admin pages, redirect back with error message
+            if ($request->is('admin/*') && $request->hasSession() && $statusCode === 500) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Error: ' . $e->getMessage());
+            }
             
             return response()->make(
                 $this->renderErrorPage($statusCode, 'Error', 'Something went wrong.'),
