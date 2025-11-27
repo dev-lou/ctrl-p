@@ -185,15 +185,20 @@ class InventoryProductController extends Controller
                 $disk = Storage::disk('supabase');
                 $uploaded = $disk->put($storagePath, file_get_contents($file), 'public');
                 
-                // Verify the file was actually uploaded
-                $fileExists = $disk->exists($storagePath);
+                // Verify the file was actually uploaded (wrap in try-catch since exists() can throw with throw:true)
+                $fileExists = false;
+                try {
+                    $fileExists = $disk->exists($storagePath);
+                } catch (\Exception $existsError) {
+                    \Log::warning('Could not verify file exists on Supabase', ['error' => $existsError->getMessage()]);
+                }
                 
                 \Log::info('Upload result', [
                     'put_returned' => $uploaded,
                     'file_exists_check' => $fileExists,
                 ]);
 
-                if ($uploaded && $fileExists) {
+                if ($uploaded) {
                     // Build the public URL for the uploaded image
                     // Format: https://<project-ref>.supabase.co/storage/v1/object/public/<bucket>/<path>
                     $imagePath = env('AWS_URL') . '/' . $storagePath;
