@@ -130,6 +130,12 @@ opcache.validate_timestamps=0\n\
 opcache.save_comments=1\n\
 opcache.fast_shutdown=1' > /usr/local/etc/php/conf.d/opcache.ini
 
+# Configure PHP upload limits
+RUN echo 'upload_max_filesize=10M\n\
+post_max_size=12M\n\
+memory_limit=256M\n\
+max_execution_time=60' > /usr/local/etc/php/conf.d/uploads.ini
+
 # =============================================================================
 # STEP 9: Set Permissions for Laravel
 # =============================================================================

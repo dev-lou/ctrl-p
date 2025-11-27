@@ -325,7 +325,7 @@ class InventoryProductController extends Controller
             'low_stock_threshold' => 'nullable|integer|min:0',
             'status' => 'required|in:active,inactive',
             'current_stock' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,gif,webp|max:5120', // 5MB max
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:10240', // 10MB max
             'variants' => 'nullable|array',
             'variants.*.id' => 'required_with:variants|exists:product_variants,id',
             'variants.*.name' => 'nullable|string|max:255',
