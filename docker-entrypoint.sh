@@ -16,15 +16,11 @@ php artisan route:clear || true
 rm -f bootstrap/cache/config.php || true
 rm -f bootstrap/cache/routes-v7.php || true
 
-# Log current config for debugging
-echo "Session driver: $(php artisan tinker --execute=\"echo config('session.driver');\" 2>/dev/null || echo 'unknown')"
-echo "Cache store: $(php artisan tinker --execute=\"echo config('cache.default');\" 2>/dev/null || echo 'unknown')"
-
 # Run database migrations (if DB is reachable)
 echo "Attempting database migrations..."
 php artisan migrate --force 2>&1 || echo "Migration failed or DB unreachable - continuing anyway"
 
-# Try to prime caches for the homepage and home page. This is a best-effort
+# Try to prime caches for the homepage. This is a best-effort
 # operation that helps the app serve cached content when the DB is unreachable.
 php artisan app:prime-cache || true
 
