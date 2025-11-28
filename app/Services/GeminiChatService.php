@@ -14,9 +14,8 @@ class GeminiChatService
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key');
-        // Use gemini-1.5-flash-latest (stable model with good performance)
-        // gemini-2.0-flash-exp may not be available in all regions
-        $this->model = config('services.gemini.model', 'gemini-2.0-flash');
+        // Use gemini-1.5-flash (stable and widely available)
+        $this->model = config('services.gemini.model', 'gemini-1.5-flash');
         // Using v1beta API endpoint
         $this->apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent";
     }

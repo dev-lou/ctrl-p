@@ -166,6 +166,12 @@ class CheckoutController extends Controller
 
         \Log::info('Prepared order items', ['order_items_count' => count($order_items), 'subtotal' => $subtotal, 'order_items' => $order_items]);
 
+        // Check if we have any valid order items
+        if (empty($order_items)) {
+            \Log::warning('No valid order items could be prepared from cart');
+            return redirect()->route('cart.index')->with('error', 'Could not process your cart items. Please try adding items again.');
+        }
+
         $total = $subtotal;
 
         // Create order with database transaction
