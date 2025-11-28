@@ -221,6 +221,23 @@
             align-items: center;
             justify-content: center;
         }
+        /* Mobile-friendly notification dropdown */
+        .notifications-dropdown {
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: 64px !important; /* below navbar */
+            width: 100vw !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            max-width: 100vw !important;
+            z-index: 60 !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18) !important;
+        }
+        .notifications-dropdown .overflow-y-auto {
+            max-height: calc(100vh - 140px) !important;
+            overflow-y: auto !important;
+        }
     }
 </style>
 
@@ -328,7 +345,7 @@
                         x-transition:leave="transition ease-in duration-75"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-95"
-                        class="absolute right-0 mt-3 rounded-xl shadow-xl z-50 overflow-hidden"
+                        class="notifications-dropdown absolute right-0 mt-3 rounded-xl shadow-xl z-50 overflow-hidden"
                         style="width: min(480px, calc(100vw - 32px)); background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); display: none;"
                     >
                         <div class="px-4 py-3 flex items-center justify-between" style="border-bottom: 1px solid rgba(0, 0, 0, 0.1); background: rgba(218, 165, 32, 0.1);">
