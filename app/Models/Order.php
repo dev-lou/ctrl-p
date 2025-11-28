@@ -10,9 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Order Model
- * 
- * Note: AuditableTrait removed to prevent transaction conflicts during order creation.
- * Order history is tracked via order status changes instead.
  *
  * @property int $id
  * @property int $user_id
