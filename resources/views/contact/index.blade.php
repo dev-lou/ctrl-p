@@ -392,12 +392,17 @@
                         </div>
                     </div>
 
-                    <div class="map-container">
-                        <!-- Google Maps embed removed (no API) - provide a link to Google Maps instead -->
-                        <div style="padding: 12px; background: rgba(30,31,32,0.6); border-radius:8px; text-align:center;">
-                            <p style="margin:0 0 8px; color:#cbd5e1;">Map preview removed to avoid external Google Maps API usage.</p>
-                            <a href="https://www.google.com/maps/search/?api=1&query=Iloilo+State+University+of+Fisheries+Science+and+Technology+Dingle+Campus" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display:inline-block; padding:10px 16px; color:#fff; background: linear-gradient(135deg,#3b82f6 0%,#2563eb 100%); border-radius:6px;">Open in Google Maps</a>
-                        </div>
+                    <div class="map-container" role="region" aria-label="CICT Student Council Office location">
+                        <!-- Embedded Google Map (iframe) -->
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1019.5295668491787!2d122.6630695470763!3d11.001138999855694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33af1776ffd9b7f1%3A0x2c4663ccaaf49fa8!2sIloilo%20State%20University%20of%20Fisheries%20Science%20and%20Technology%E2%80%93%20Dingle%20Campus!5e1!3m2!1sen!2sph!4v1764327935192!5m2!1sen!2sph"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            allowfullscreen
+                            style="border:0; width:100%; height:100%; display:block;"
+                            aria-hidden="false"
+                            title="CICT Student Council Office - Google Maps"
+                        ></iframe>
                     </div>
                 </div>
             </div>
