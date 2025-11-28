@@ -28,7 +28,10 @@ Thumbs.db
 /build-production.bat
 
 # Test files
-test_*.php
+## Ignore test script artifacts
+/scripts/test_*.php
+!/scripts/*.example.php
+/scripts/*_result.json
 test_*.html
 tmp_*.html
 *_result.json
