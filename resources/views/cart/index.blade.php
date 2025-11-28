@@ -414,6 +414,15 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="mb-8 rounded-lg p-6 flex items-start gap-4" style="background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); border: 1px solid #F87171;">
+                    <svg class="w-6 h-6 flex-shrink-0 mt-1" fill="#DC2626" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <p style="margin: 0; font-weight: 600; color: #991B1B;">{{ session('error') }}</p>
+                </div>
+            @endif
+
             @if (count($items) > 0)
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Desktop Table View (Hidden on Mobile) -->

@@ -96,9 +96,14 @@ class GeminiChatService
                     'api_key_set' => !empty($this->apiKey),
                 ]);
                 
+                // Parse error message from response
+                $errorBody = $response->json();
+                $errorMessage = $errorBody['error']['message'] ?? 'Unknown error';
+                
                 return [
                     'success' => false,
                     'error' => 'CICT AI is not available right now. Please try again later.',
+                    'debug' => config('app.debug') ? "API Error {$response->status()}: {$errorMessage}" : null,
                 ];
             }
 
