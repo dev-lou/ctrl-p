@@ -1,28 +1,33 @@
+<!--
+   README: Updated on 2025-11-28
+   Purpose: Developer-facing quickstart, setup instructions, and references.
+-->
+
 # Ctrl+P — CICT Student Council Merchandise & Services Platform
 
-Ctrl+P is a full-stack, Laravel-based e-commerce and services platform built for the CICT Student Council. It enables product cataloging, inventory management, order processing, and an AI-powered customer support assistant (Gemini). This README is focused on the developer workflow for setting up, contributing, and safely deploying the application.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Laravel 11](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel)](https://laravel.com)
+[![PHP 8.2](https://img.shields.io/badge/PHP-8.2-8892BF?style=flat&logo=php)](https://www.php.net)
+[![Vite](https://img.shields.io/badge/Vite-7.0-646CFF?style=flat&logo=vite)](https://vitejs.dev)
+[![Tailwind](https://img.shields.io/badge/Tailwind-4.0-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com)
 
+An e-commerce and service management platform powering the CICT Student Council’s merchandise and printing services. Built with Laravel and modern JS tooling, it includes inventory, order processing, a responsive UI, an admin dashboard, and Gemini AI chatbot integration for support.
 ---
 
-## Project Title & Description
+## What is Ctrl+P?
 
-- Title: Ctrl+P
-- Description: A modern web application that manages student council merchandise and printing services with a polished admin dashboard, customer-facing store, secure checkout, and an AI chat assistant for support.
-
-This project includes product and inventory management, order processing, user management, notifications, and a Gemini-based chatbot integration for helpful answers and customer support.
+Ctrl+P is a production-ready platform that enables the CICT Student Council to sell merchandise, manage inventory, process orders, and provide AI-assisted customer support. It ships with an admin UI for manager workflows and a responsive storefront optimized for accessibility.
 
 ---
 
 ## Tech Stack
 
-- PHP 8.2+, Laravel 11
-- Composer for PHP dependencies
-- MySQL / PostgreSQL (Neon or Supabase for production)
-- JavaScript, Vite, Alpine.js
-- Tailwind CSS for styling
-- Docker for containerized deployments
-- Hosting: Render (Docker) examples provided
-- Google Gemini — AI assistant
+- Backend: Laravel 11 (PHP 8.2+)
+- Frontend: Vite, Alpine.js, Tailwind CSS
+- DB: PostgreSQL (Neon / Supabase recommended)
+- Storage: Supabase S3-compatible storage (via Flysystem)
+- AI: Google Gemini generative models via API
+- Deploy: Docker-ready for Render or other container platforms
 
 ---
 
@@ -89,81 +94,111 @@ php artisan serve --host=0.0.0.0 --port=8000
 
 ## Environment Variables
 
-The project uses `.env` for all local and deployment settings. The `.env.example` file lists all environment variable names and default values (if any). To protect your secrets and credentials, follow these rules:
+The repo uses `.env` for local and deployment configuration. For onboarding and source control safety:
 
-- Copy `.env.example` to `.env` and fill in values (API keys, database connection, etc.).
-- NEVER commit `.env` to the repository or push it to any shared repos. The `.gitignore` is already configured to ignore `.env` and common sensitive files.
-- Use the `.env.example` with placeholders for onboarding new developers.
+- Copy `.env.example` to `.env` and add your own credentials.
+- **Do not** commit `.env`. The repository `.gitignore` excludes `.env` and other sensitive files.
+- Keep secrets in your environment provider (Render, GitHub Actions secrets, or Secret Manager).
 
-Common variables (example placeholders in `.env.example`)
-- `APP_NAME`, `APP_ENV`, `APP_KEY`, `APP_URL`
-- `DB_CONNECTION`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` or `DATABASE_URL`
-- `SUPABASE` / `AWS_*` keys, `FILESYSTEM_DISK` (if using Supabase storage)
-- `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_ANON_KEY` (server & client keys)
-- `GEMINI_API_KEY` and `GEMINI_MODEL` for the Gemini integration
+Key settings you’ll typically configure in `.env` (short list):
+```text
+APP_KEY, APP_URL, APP_ENV, APP_DEBUG
+DB_* or DATABASE_URL (Neon or Supabase) and DB_NEON_ENDPOINT
+AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ENDPOINT
+SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY
+GEMINI_API_KEY, GEMINI_MODEL
+SESSION_DRIVER, CACHE_STORE, QUEUE_CONNECTION
+```
 
-Bold Warning:
-**DO NOT COMMIT** your `.env` with secrets to the repository or any CI/CD logs. If sensitive keys are ever committed, rotate them immediately.
+> **Warning:** If you accidentally commit secrets (e.g., API keys or DB passwords), rotate them immediately and follow the repo history purge instructions.
 
 ---
 
-## Development Workflow
+## Developer Experience & Workflow
 
-- Branch from `main` for new features or bug fixes following your repo's branching & PR conventions.
-- Use `composer` and `npm` scripts for code style & tests.
-- Add any environment-specific configuration to the `.env` file and include a corresponding `.env.example` entry for devs.
+- Use feature branches from `main` for development and PRs for code review.
+- Write tests and add regression coverage for new features.
+- Keep config in `.env` and avoid committing secrets.
 
-Helpful commands
+Common developer commands:
 
 ```bash
-# Clear caches
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
+# Install deps
+composer install
+npm install
 
-# Migrations & seeds
+# Dev server
+npm run dev    # Vite HMR
+php artisan serve
+
+# Build & Test
+npm run build:production
+composer test
+
+# DB
 php artisan migrate --seed
 
-# Run tests
-composer test
+# Clean caches
+php artisan cache:clear && php artisan config:clear && php artisan view:clear
 ```
 
 ---
 
-## Deployment Notes
+## Running in Docker (Render / Local)
 
-This repo has Docker assets and examples for deploying on Render. A typical Docker-based deployment involves building images, setting runtime environment variables in Render, and running `php artisan migrate --force` during their deploy lifecycle.
+The repository includes a Dockerfile and Docker Compose example for local testing. For Render, use the Docker build flow and set your environment variables in the Render dashboard.
 
-Key deployment reminders
-- Ensure environment variables for production are configured with secret values in your platform's environment store (Render Dashboard, GitHub Secrets, etc.).
-- Rotate API keys if they were ever stored in the repo.
-- For Gemini API usage: confirm model & key are valid for your account and the key is restricted according to your security policy.
+Local (Docker Compose) quickstart:
+```bash
+docker-compose build
+docker-compose up -d
+# Run migrations inside container if needed
+docker exec -it <app_container> php artisan migrate --force
+```
+
+Render Deploy tips:
+- Add environment variables in Render’s Dashboard Secrets section.
+- Ensure `APP_KEY` is generated and `APP_DEBUG=false` for production.
+- Migrations can run in a deploy hook or from a Render shell using `php artisan migrate --force`.
 
 ---
 
-## Security & Best Practices
 
-- Do not store `APP_KEY`, `GEMINI_API_KEY`, `AWS_SECRET_ACCESS_KEY`, or DB credentials in source control.
-- Use secure secret storage or environment variable management in production (Render Secrets, AWS Secrets Manager, Google Secret Manager).
-- Add pre-commit or CI checks for secrets scanning (e.g., `gitleaks`, `git-secrets`) and ensure PR pipelines fail on discovery.
-- Disable debug output in production (`APP_DEBUG=false`).
+## Tests & Quality
+
+- The project uses PHPUnit for backend tests and scripts for tooling checks.
+- Run the test suite with:
+```bash
+composer test
+```
+
+Add CI (GitHub Actions) to run `composer test`, style checks, and a secret scanning job as part of PR checks.
 
 ---
+
 
 ## Contributing
 
-Please follow the `CONTRIBUTING.md` guidelines if one exists in the repo. Otherwise:
+We welcome contributions — please follow these steps:
 
-1. Fork the repository and create a feature branch from `main`.
-2. Implement changes and add tests where applicable.
-3. Run static linters, tests, and create a PR describing your changes.
-4. A reviewer will review, and after approval, it can be merged to `main`.
+1. Fork and create a feature branch.
+2. Add tests for new behavior and update documentation where appropriate.
+3. Format code and run tests before creating a PR.
+4. A maintainer will review. Keep PRs focused and self-contained.
+
+Please follow the GitHub `Contributing` and `Code of Conduct` guidelines in this repo if they exist.
 
 ---
 
-## License
 
-MIT — see `LICENSE` for details.
+---
+
+## Additional Resources & Support
+
+If you need help or want to report a bug, open an issue in the repo or contact the repo owner.
+
+**Thank you for contributing to Ctrl+P!**
+
 
 ---
 
