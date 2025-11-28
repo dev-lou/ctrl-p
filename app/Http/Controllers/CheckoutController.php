@@ -159,6 +159,8 @@ class CheckoutController extends Controller
                 $order_items[] = [
                     'product_id' => $item['product_id'],
                     'product_variant_id' => $item['variant_id'],
+                    'product_name' => $product->name ?? ($item['product_name'] ?? 'Unknown Product'),
+                    'variant_name' => $variant ? ($variant->name ?? ($item['variant_name'] ?? null)) : ($item['variant_name'] ?? null),
                     'quantity' => $item['quantity'],
                     'unit_price' => $price,
                     'total_price' => $item_total,
@@ -211,6 +213,8 @@ class CheckoutController extends Controller
                     'order_id' => $orderId,
                     'product_id' => $itemData['product_id'],
                     'product_variant_id' => $itemData['product_variant_id'],
+                    'product_name' => $itemData['product_name'] ?? 'Unknown Product',
+                    'variant_name' => $itemData['variant_name'] ?? null,
                     'quantity' => $itemData['quantity'],
                     'unit_price' => $itemData['unit_price'],
                     'total_price' => $itemData['total_price'],

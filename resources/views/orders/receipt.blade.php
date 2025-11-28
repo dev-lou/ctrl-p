@@ -412,9 +412,9 @@
                             @foreach($order->items as $item)
                                 <tr>
                                     <td>
-                                        <div style="font-weight: 700; margin-bottom: 4px;">{{ $item->product->name }}</div>
-                                        @if($item->variant)
-                                            <div style="color: #666666; font-size: 13px;">🎨 {{ $item->variant->name }}</div>
+                                        <div style="font-weight: 700; margin-bottom: 4px;">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</div>
+                                        @if($item->variant || $item->variant_name)
+                                            <div style="color: #666666; font-size: 13px;">🎨 {{ optional($item->variant)->name ?? $item->variant_name }}</div>
                                         @endif
                                     </td>
                                     <td class="text-center" style="font-weight: 700;">{{ $item->quantity }}</td>

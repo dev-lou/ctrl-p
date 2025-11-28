@@ -261,8 +261,8 @@
                             <div class="space-y-0">
                                 @foreach ($order->items as $item)
                                     <div class="order-item">
-                                        @if ($item->product->image_path)
-                                            <img src="{{ $item->product->image_url }}" alt="{{ $item->product->name }}" class="order-item-image">
+                                        @if (optional($item->product)->image_path)
+                                            <img src="{{ optional($item->product)->image_url }}" alt="{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}" class="order-item-image">
                                         @else
                                             <div class="order-item-image flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
                                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -271,9 +271,9 @@
                                             </div>
                                         @endif
                                         <div class="flex-1">
-                                            <p class="order-text font-bold" style="font-size: 16px; font-weight: 700;">{{ $item->product->name }}</p>
-                                            @if ($item->variant)
-                                                <p class="text-sm" style="color: #666666; margin-top: 4px;">🎨 {{ $item->variant->name }}</p>
+                                            <p class="order-text font-bold" style="font-size: 16px; font-weight: 700;">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</p>
+                                            @if ($item->variant || $item->variant_name)
+                                                <p class="text-sm" style="color: #666666; margin-top: 4px;">🎨 {{ optional($item->variant)->name ?? $item->variant_name }}</p>
                                             @endif
                                             <p class="text-sm" style="color: #888888; margin-top: 8px; font-weight: 600;">Qty: <span style="color: #1a1a1a; font-weight: 700;">{{ $item->quantity }}</span></p>
                                         </div>

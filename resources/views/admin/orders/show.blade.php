@@ -45,7 +45,7 @@
                     @forelse ($order->items as $item)
                         <div class="flex justify-between items-center pb-4 mb-4" style="border-bottom: 2px solid #b0bcc4;">
                             <div>
-                                <p class="font-semibold" style="color: #ffffff;">{{ $item->product->name ?? 'Product' }}</p>
+                                <p class="font-semibold" style="color: #ffffff;">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</p>
                                 <p class="text-sm" style="color: #b0bcc4;">Quantity: {{ $item->quantity }}</p>
                             </div>
                             <p class="font-semibold" style="color: #ffffff;">₱{{ number_format($item->unit_price * $item->quantity, 2) }}</p>

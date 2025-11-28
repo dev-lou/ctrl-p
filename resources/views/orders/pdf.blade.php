@@ -450,9 +450,9 @@
             <div class="section-header">Items Ordered</div>
             @foreach($order->items as $item)
                 <div class="item">
-                    <div class="item-name">{{ $item->product->name }}</div>
-                    @if($item->variant)
-                        <div class="item-variant">Variant: {{ $item->variant->name }}</div>
+                    <div class="item-name">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</div>
+                    @if($item->variant || $item->variant_name)
+                        <div class="item-variant">Variant: {{ optional($item->variant)->name ?? $item->variant_name }}</div>
                     @endif
                     <div class="item-details">
                         <span class="item-qty">{{ $item->quantity }} x ₱{{ number_format($item->unit_price, 2) }}</span>

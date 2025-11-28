@@ -543,11 +543,11 @@
                         <tr>
                             <td class="item-number">{{ $index + 1 }}</td>
                             <td>
-                                <span class="item-name">{{ substr($item->product->name, 0, 35) }}</span>
+                                <span class="item-name">{{ substr(optional($item->product)->name ?? $item->product_name ?? 'Product', 0, 35) }}</span>
                             </td>
                             <td>
-                                @if($item->variant)
-                                    <span class="item-variant">{{ substr($item->variant->name, 0, 25) }}</span>
+                                @if($item->variant || $item->variant_name)
+                                    <span class="item-variant">{{ substr(optional($item->variant)->name ?? $item->variant_name, 0, 25) }}</span>
                                 @else
                                     <span class="item-variant">Standard</span>
                                 @endif

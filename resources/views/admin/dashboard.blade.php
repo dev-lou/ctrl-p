@@ -259,7 +259,7 @@
                         @if ($item->product)
                         <div class="flex items-center gap-4 p-4 rounded-lg transition-all duration-300" style="background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%); border: 2px solid #2a3f5f;" onmouseover="this.style.borderColor='#0f6fdd'; this.style.boxShadow='0 4px 12px rgba(15, 111, 221, 0.3)'; this.style.transform='translateX(4px)'" onmouseout="this.style.borderColor='#2a3f5f'; this.style.boxShadow='none'; this.style.transform='translateX(0)'">
                             <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-white text-base truncate">{{ $item->product->name }}</p>
+                                <p class="font-semibold text-white text-base truncate">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</p>
                                 <p class="text-sm mt-1" style="color: #b0bcc4;">📦 {{ $item->order_count }} orders</p>
                             </div>
                             <div class="text-right flex-shrink-0">

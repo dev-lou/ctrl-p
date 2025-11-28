@@ -14,6 +14,8 @@ class OrderItem extends Model
         'order_id',
         'product_id',
         'product_variant_id',
+        'product_name',
+        'variant_name',
         'quantity',
         'unit_price',
         'total_price',
@@ -23,6 +25,8 @@ class OrderItem extends Model
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
         'quantity' => 'integer',
+        'product_name' => 'string',
+        'variant_name' => 'string',
     ];
 
     /**
