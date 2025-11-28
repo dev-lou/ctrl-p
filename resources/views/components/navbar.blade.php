@@ -349,8 +349,13 @@
                         style="width: min(480px, calc(100vw - 32px)); background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); display: none;"
                     >
                         <div class="px-4 py-3 flex items-center justify-between" style="border-bottom: 1px solid rgba(0, 0, 0, 0.1); background: rgba(218, 165, 32, 0.1);">
-                            <h3 class="text-sm font-bold text-black">Notifications</h3>
-                            <span x-cloak x-show="unreadCount > 0" class="text-xs font-semibold text-white px-2 py-1 rounded-full" style="background: #ff0000;" x-text="unreadCount + ' new'"></span>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-bold text-black">Notifications</h3>
+                                <span x-cloak x-show="unreadCount > 0" class="text-xs font-semibold text-white px-2 py-1 rounded-full" style="background: #ff0000;" x-text="unreadCount + ' new'"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button @click="open = false" class="p-1 rounded-md text-black hover:bg-black/5" title="Close notifications">✕</button>
+                            </div>
                         </div>
 
                         <div class="overflow-y-auto">
