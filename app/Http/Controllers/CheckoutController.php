@@ -168,36 +168,54 @@ class CheckoutController extends Controller
 
         $total = $subtotal;
 
-        // Create order
-        \Log::info('Creating order', ['user_id' => auth()->id(), 'total' => $total, 'subtotal' => $subtotal]);
-        $order = Order::create([
-            'user_id' => auth()->id(),
-            'order_number' => 'ORD-' . date('YmdHis') . '-' . auth()->id(),
-            'status' => 'pending',
-            'subtotal' => $subtotal,
-            'tax' => 0,
-            'total' => $total,
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        // Create order with database transaction
+        try {
+            \DB::beginTransaction();
+            
+            \Log::info('Creating order', ['user_id' => auth()->id(), 'total' => $total, 'subtotal' => $subtotal]);
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'order_number' => 'ORD-' . date('YmdHis') . '-' . auth()->id(),
+                'status' => 'pending',
+                'subtotal' => $subtotal,
+                'tax' => 0,
+                'total' => $total,
+                'notes' => $validated['notes'] ?? null,
+            ]);
 
             \Log::info('Order created', ['order_id' => $order->id, 'order_number' => $order->order_number]);
-        // Create order items
-        foreach ($order_items as $itemData) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $itemData['product_id'],
-                'product_variant_id' => $itemData['product_variant_id'],
-                'quantity' => $itemData['quantity'],
-                'unit_price' => $itemData['unit_price'],
-                'total_price' => $itemData['total_price'],
-            ]);
+            
+            // Create order items
+            foreach ($order_items as $itemData) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $itemData['product_id'],
+                    'product_variant_id' => $itemData['product_variant_id'],
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'total_price' => $itemData['total_price'],
+                ]);
                 \Log::info('Order item created', ['order_id' => $order->id, 'product_id' => $itemData['product_id'], 'quantity' => $itemData['quantity']]);
+            }
+            
+            \DB::commit();
+            
+            // Clear cart
+            session()->forget('cart');
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Order placed successfully! Your order has been received.');
+                
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            \Log::error('Failed to create order', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+            ]);
+            
+            return redirect()->route('cart.index')
+                ->with('error', 'Failed to place your order. Please try again. Error: ' . $e->getMessage());
         }
-
-        // Clear cart
-        session()->forget('cart');
-
-        return redirect()->route('orders.show', $order)
-            ->with('success', 'Order placed successfully! Your order has been received.');
     }
 }
