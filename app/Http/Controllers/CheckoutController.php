@@ -141,7 +141,7 @@ class CheckoutController extends Controller
 
                 if ($product) {
                 // Validate stock availability
-                $availableStock = $variant ? $variant->stock : $product->current_stock;
+                $availableStock = $variant ? $variant->stock_quantity : $product->current_stock;
                 \Log::info('Stock check for checkout item', ['product_id' => $product->id, 'variant_id' => $item['variant_id'] ?? null, 'available_stock' => $availableStock, 'requested' => $item['quantity']]);
                     // Only enforce stock when availableStock is explicitly set (not null)
                     if (!is_null($availableStock) && $availableStock < $item['quantity']) {
