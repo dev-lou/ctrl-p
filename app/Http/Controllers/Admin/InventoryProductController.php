@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class InventoryProductController extends Controller
 {
@@ -162,7 +163,7 @@ class InventoryProductController extends Controller
                 'variants.*.price_modifier' => 'nullable|numeric|min:0',
             ]);
 
-        // Handle image upload to Supabase Storage
+        // Handle image upload to Supabase Storage (or fallback to local public disk for local dev)
         $imagePath = null;
         if ($request->hasFile('image')) {
             try {
@@ -182,8 +183,9 @@ class InventoryProductController extends Controller
                     'aws_url' => env('AWS_URL'),
                 ]);
 
-                // Upload to Supabase Storage using the 'supabase' disk
-                $disk = Storage::disk('supabase');
+                // Choose a disk - prefer supabase if configured, otherwise use public local disk
+                $diskName = (config('filesystems.disks.supabase.key') && config('filesystems.disks.supabase.secret') && config('filesystems.disks.supabase.bucket')) ? 'supabase' : 'public';
+                $disk = Storage::disk($diskName);
                 $uploaded = $disk->put($storagePath, file_get_contents($file), 'public');
                 
                 // Verify the file was actually uploaded (wrap in try-catch since exists() can throw with throw:true)
@@ -202,7 +204,11 @@ class InventoryProductController extends Controller
                 if ($uploaded) {
                     // Build the public URL for the uploaded image
                     // Format: https://<project-ref>.supabase.co/storage/v1/object/public/<bucket>/<path>
-                    $imagePath = env('AWS_URL') . '/' . $storagePath;
+                    if ($diskName === 'supabase') {
+                        $imagePath = env('AWS_URL') . '/' . $storagePath; // public supabase URL
+                    } else {
+                        $imagePath = '/storage/' . ltrim($storagePath, '/');
+                    }
 
                     \Log::info('Image uploaded to Supabase successfully', [
                         'storage_path' => $storagePath,
@@ -359,7 +365,7 @@ class InventoryProductController extends Controller
                     $this->deleteSupabaseImage($product->image_path);
                 }
 
-                // Upload new image to Supabase Storage
+                // Upload new image to Supabase Storage (or fallback to local public disk)
                 $file = $request->file('image');
                 $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
                 $storagePath = $filename;  // Store directly in bucket root since bucket is already 'products'
@@ -371,11 +377,16 @@ class InventoryProductController extends Controller
                     'disk' => 'supabase',
                 ]);
 
-                $uploaded = Storage::disk('supabase')->put($storagePath, file_get_contents($file), 'public');
+                $diskName = (config('filesystems.disks.supabase.key') && config('filesystems.disks.supabase.secret') && config('filesystems.disks.supabase.bucket')) ? 'supabase' : 'public';
+                $uploaded = Storage::disk($diskName)->put($storagePath, file_get_contents($file), 'public');
 
                 if ($uploaded) {
                     // Build the public URL for the uploaded image
-                    $validated['image_path'] = env('AWS_URL') . '/' . $storagePath;
+                    if ($diskName === 'supabase') {
+                        $validated['image_path'] = env('AWS_URL') . '/' . $storagePath;
+                    } else {
+                        $validated['image_path'] = '/storage/' . ltrim($storagePath, '/');
+                    }
 
                     \Log::info('Product image updated on Supabase', [
                         'storage_path' => $storagePath,
@@ -574,8 +585,9 @@ class InventoryProductController extends Controller
                 $storagePath = ltrim(str_replace($baseUrl, '', $imageUrl), '/');
 
                 if ($storagePath) {
-                    Storage::disk('supabase')->delete($storagePath);
-                    \Log::info('Deleted image from Supabase', ['path' => $storagePath]);
+                    $diskName = (config('filesystems.disks.supabase.key') && config('filesystems.disks.supabase.secret') && config('filesystems.disks.supabase.bucket')) ? 'supabase' : 'public';
+                    Storage::disk($diskName)->delete($storagePath);
+                    \Log::info('Deleted image', ['disk' => $diskName, 'path' => $storagePath]);
                     return true;
                 }
             }
