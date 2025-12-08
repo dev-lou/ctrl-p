@@ -66,45 +66,45 @@ class AppServiceProvider extends ServiceProvider
         // Share order counts with all views via View Composer
         // Skip for error views and console commands to prevent infinite loops
         // and avoid database queries during CLI tasks such as `php artisan`.
-        if (! app()->runningInConsole()) {
-            View::composer('*', function ($view) {
-            $viewName = $view->getName();
-            
-            // Skip error views and API responses
-            if (str_starts_with($viewName, 'errors.') || str_starts_with($viewName, 'errors::')) {
-                $view->with([
-                    'pendingOrderCount' => 0,
-                    'processingOrderCount' => 0,
-                    'completedOrderCount' => 0,
-                    'totalOrderCount' => 0,
-                ]);
-                return;
-            }
-            
-            try {
-                $pendingOrderCount = Order::where('status', 'pending')->count();
-                $processingOrderCount = Order::where('status', 'processing')->count();
-                $completedOrderCount = Order::where('status', 'completed')->count();
-                $totalOrderCount = Order::count();
-
-                $view->with([
-                    'pendingOrderCount' => $pendingOrderCount,
-                    'processingOrderCount' => $processingOrderCount,
-                    'completedOrderCount' => $completedOrderCount,
-                    'totalOrderCount' => $totalOrderCount,
-                ]);
-            } catch (\Throwable $e) {
-                // Fallback to zero counts if database query fails
-                // Don't log excessively to avoid log spam
-                $view->with([
-                    'pendingOrderCount' => 0,
-                    'processingOrderCount' => 0,
-                    'completedOrderCount' => 0,
-                    'totalOrderCount' => 0,
-                ]);
-            }
-            });
+        View::composer('*', function ($view) {
+        $viewName = $view->getName();
+        
+        // Skip error views, API responses, AND components (to prevent Blade compilation issues)
+        if (str_starts_with($viewName, 'errors.') || 
+            str_starts_with($viewName, 'errors::') ||
+            str_starts_with($viewName, 'components.')) {
+            $view->with([
+                'pendingOrderCount' => 0,
+                'processingOrderCount' => 0,
+                'completedOrderCount' => 0,
+                'totalOrderCount' => 0,
+            ]);
+            return;
         }
+        
+        try {
+            $pendingOrderCount = Order::where('status', 'pending')->count();
+            $processingOrderCount = Order::where('status', 'processing')->count();
+            $completedOrderCount = Order::where('status', 'completed')->count();
+            $totalOrderCount = Order::count();
+
+            $view->with([
+                'pendingOrderCount' => $pendingOrderCount,
+                'processingOrderCount' => $processingOrderCount,
+                'completedOrderCount' => $completedOrderCount,
+                'totalOrderCount' => $totalOrderCount,
+            ]);
+        } catch (\Throwable $e) {
+            // Fallback to zero counts if database query fails
+            // Don't log excessively to avoid log spam
+            $view->with([
+                'pendingOrderCount' => 0,
+                'processingOrderCount' => 0,
+                'completedOrderCount' => 0,
+                'totalOrderCount' => 0,
+            ]);
+        }
+        });
 
         // Vite manifest fallback: In some Vite versions or setups, the manifest may be
         // emitted as public/build/.vite/manifest.json. To avoid runtime errors when
