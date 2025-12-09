@@ -223,6 +223,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/inventory-performance', [AnalyticsController::class, 'getInventoryPerformance'])->name('inventory-performance');
         Route::get('/monthly-revenue', [AnalyticsController::class, 'getMonthlyRevenue'])->name('monthly-revenue');
     });
+
+    // Admin Gemini diagnostics (safe, admin-only)
+    Route::get('/gemini/diagnose', [\App\Http\Controllers\Admin\GeminiDiagController::class, 'index'])->name('gemini.diagnose');
     
     // ========================================================================
     // Audit Logs

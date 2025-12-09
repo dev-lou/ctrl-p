@@ -13,11 +13,27 @@ class GeminiChatService
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.api_key');
-        // Use gemini-2.0-flash (stable and available)
-        $this->model = config('services.gemini.model', 'gemini-2.0-flash');
+        $this->apiKey = config('services.gemini.api_key') ?? '';
+        // Use gemini-2.5-flash-live (free tier, available as of December 2025)
+        $this->model = config('services.gemini.model', 'gemini-2.5-flash-live');
         // Using v1beta API endpoint
         $this->apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent";
+    }
+
+    /**
+     * For diagnostic/testing: return the model in use.
+     */
+    public function getModel(): string
+    {
+        return $this->model;
+    }
+
+    /**
+     * For diagnostic/testing: return the computed API URL.
+     */
+    public function getApiUrl(): string
+    {
+        return $this->apiUrl;
     }
 
     /**
@@ -99,12 +115,49 @@ class GeminiChatService
                 // Parse error message from response
                 $errorBody = $response->json();
                 $errorMessage = $errorBody['error']['message'] ?? 'Unknown error';
+
+                // If we're being rate limited, return a helpful error and retry info
+                if ($response->status() == 429) {
+                    $retryInfo = null;
+                    if (isset($errorBody['error']['details']) && is_array($errorBody['error']['details'])) {
+                        foreach ($errorBody['error']['details'] as $d) {
+                            if (($d['@type'] ?? '') === 'type.googleapis.com/google.rpc.RetryInfo') {
+                                $retryInfo = $d['retryDelay'] ?? null;
+                                break;
+                            }
+                        }
+                    }
+
+                    return [
+                        'success' => false,
+                        'error' => 'CICT AI is temporarily unavailable due to quota limits. Please check the billing/quotas on your Google Cloud project.',
+                        'debug' => config('app.debug') ? "API Error 429: {$errorMessage} | Retry: {$retryInfo}" : null,
+                    ];
+                }
                 
                 return [
                     'success' => false,
                     'error' => 'CICT AI is not available right now. Please try again later.',
                     'debug' => config('app.debug') ? "API Error {$response->status()}: {$errorMessage}" : null,
                 ];
+            }
+
+            // Helpful debug: If the API reports the model isn't found for the current
+            // API version, call the List Models endpoint and log the available models.
+            if ($response->status() == 404) {
+                try {
+                    $modelsResp = Http::withHeaders(['Content-Type' => 'application/json'])
+                        ->get('https://generativelanguage.googleapis.com/v1beta/models?key=' . $this->apiKey);
+                    if ($modelsResp->successful()) {
+                        $modelsData = $modelsResp->json();
+                        $modelIds = array_map(fn($m) => $m['name'] ?? ($m['id'] ?? null), $modelsData['models'] ?? []);
+                        Log::warning('Gemini models list (v1beta) fetched for debugging', ['models' => $modelIds]);
+                    } else {
+                        Log::warning('Failed to fetch Gemini models list for debugging', ['status' => $modelsResp->status(), 'body' => $modelsResp->body()]);
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Exception while fetching Gemini models', ['message' => $e->getMessage()]);
+                }
             }
 
             $data = $response->json();

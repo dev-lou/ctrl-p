@@ -6,7 +6,7 @@ Problem
 Supabase database hosts sometimes only expose an IPv6 address (AAAA) and no IPv4 address (A). Many cloud runtimes (like Render.com) operate with IPv4-only egress, meaning they cannot reach IPv6-only database endpoints. When this occurs, the Laravel app will show errors like:
 
 ```
-SQLSTATE[08006] [7] connection to server at "db.ppsdvdrnvquykxsmwjmg.supabase.co" (...) port 5432 failed: Network is unreachable
+SQLSTATE[08006] [7] connection to server at "db.YOUR_PROJECT_REF.supabase.co" (...) port 5432 failed: Network is unreachable
 ```
 
 Short-term options
@@ -22,7 +22,7 @@ A) Configure an IPv4 proxy
 sudo apt update && sudo apt install -y socat
 
 # forward local IPv4 port 5432 to Supabase IPv6 host
-sudo socat TCP-LISTEN:5432,reuseaddr,fork TCP6:db.ppsdvdrnvquykxsmwjmg.supabase.co:5432
+sudo socat TCP-LISTEN:5432,reuseaddr,fork TCP6:db.YOUR_PROJECT_REF.supabase.co:5432
 ```
 
 - Harden the server firewall and only allow requests from your Render service IPs.

@@ -95,12 +95,12 @@ Copy these variables to your Render Dashboard → Environment section.
 | Variable | Value | Description |
 |----------|-------|-------------|
 | `FILESYSTEM_DISK` | `supabase` | Use Supabase for file storage |
-| `AWS_ACCESS_KEY_ID` | `ppsdvdrnvquykxsmwjmg` | Supabase project ref |
+| `AWS_ACCESS_KEY_ID` | `YOUR_SUPABASE_PROJECT_REF` | Supabase project ref |
 | `AWS_SECRET_ACCESS_KEY` | `YOUR_SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
 | `AWS_DEFAULT_REGION` | `ap-southeast-1` | Supabase region |
 | `AWS_BUCKET` | `products` | Storage bucket name |
-| `AWS_ENDPOINT` | `https://ppsdvdrnvquykxsmwjmg.supabase.co/storage/v1/s3` | Supabase S3 endpoint |
-| `AWS_URL` | `https://ppsdvdrnvquykxsmwjmg.supabase.co/storage/v1/object/public/products` | Public URL for images |
+| `AWS_ENDPOINT` | `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/storage/v1/s3` | Supabase S3 endpoint |
+| `AWS_URL` | `https://YOUR_SUPABASE_PROJECT_REF.supabase.co/storage/v1/object/public/products` | Public URL for images |
 | `AWS_USE_PATH_STYLE_ENDPOINT` | `true` | Required for Supabase S3 |
 
 ### 🔴 REQUIRED - Neon Endpoint (For SNI Routing)
@@ -163,12 +163,12 @@ DB_SSLMODE=require
 # SUPABASE STORAGE (For image uploads - keep these!)
 # =============================================================================
 FILESYSTEM_DISK=supabase
-AWS_ACCESS_KEY_ID=ppsdvdrnvquykxsmwjmg
+AWS_ACCESS_KEY_ID=YOUR_SUPABASE_PROJECT_REF
 AWS_SECRET_ACCESS_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
 AWS_DEFAULT_REGION=ap-southeast-1
 AWS_BUCKET=products
-AWS_ENDPOINT=https://ppsdvdrnvquykxsmwjmg.supabase.co/storage/v1/s3
-AWS_URL=https://ppsdvdrnvquykxsmwjmg.supabase.co/storage/v1/object/public/products
+AWS_ENDPOINT=https://YOUR_SUPABASE_PROJECT_REF.supabase.co/storage/v1/s3
+AWS_URL=https://YOUR_SUPABASE_PROJECT_REF.supabase.co/storage/v1/object/public/products
 AWS_USE_PATH_STYLE_ENDPOINT=true
 
 # =============================================================================
