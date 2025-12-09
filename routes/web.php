@@ -86,6 +86,52 @@ Route::get('/healthz', function () {
     }
 });
 
+// Optional debug endpoint for Gemini diagnostics (secure via token).
+// Only enabled when CICT_GEMINI_DEBUG_TOKEN is set in the environment to avoid exposure.
+if (!empty(env('CICT_GEMINI_DEBUG_TOKEN'))) {
+    Route::get('/_debug/gemini', function (Illuminate\Http\Request $request) {
+        $token = env('CICT_GEMINI_DEBUG_TOKEN');
+        $provided = $request->header('X-Debug-Token') ?: $request->query('debug_token');
+        if ($provided !== $token) {
+            abort(403, 'Forbidden');
+        }
+
+        $model = config('services.gemini.model');
+        $apiKeySet = !empty(config('services.gemini.api_key'));
+        $apiUrlBase = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+        $result = [
+            'model_config' => $model,
+            'api_url_base' => $apiUrlBase,
+            'api_key_set' => $apiKeySet,
+        ];
+
+        if (!$apiKeySet) {
+            return response()->json($result);
+        }
+
+        try {
+            $res = Illuminate\Support\Facades\Http::withHeaders(['Content-Type' => 'application/json'])
+                ->get($apiUrlBase . '?key=' . config('services.gemini.api_key'));
+
+            if (!$res->successful()) {
+                $result['models_fetch_status'] = $res->status();
+                $result['models_fetch_body'] = $res->json();
+                return response()->json($result, 200);
+            }
+
+            $data = $res->json();
+            $modelNames = array_map(fn($m) => $m['name'] ?? ($m['id'] ?? null), $data['models'] ?? []);
+            $result['available_models'] = $modelNames;
+            return response()->json($result, 200);
+        } catch (\Exception $e) {
+            $result['exception'] = $e->getMessage();
+            return response()->json($result, 200);
+        }
+
+    })->name('debug.gemini');
+}
+
 // Shop Routes (Browse Products)
 Route::get('/shop', [ProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product}', [ProductController::class, 'show'])->name('shop.show');
