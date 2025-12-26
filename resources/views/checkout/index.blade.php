@@ -427,11 +427,6 @@
                         Complete your order securely
                     </div>
 
-                    <div class="checkout-steps">
-                        <div class="checkout-step">Cart</div>
-                        <div class="checkout-step active">Checkout</div>
-                        <div class="checkout-step">Confirmation</div>
-                    </div>
                 </div>
 
                 <div class="checkout-shell">

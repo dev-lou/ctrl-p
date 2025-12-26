@@ -1,5 +1,6 @@
 @props([])
 
+<style>[x-cloak]{display:none!important;}</style>
 <aside class="w-full h-full text-white flex flex-col overflow-hidden shadow-2xl" style="background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%); border-right: 3px solid #2a3f5f; display: flex; flex-direction: column;">
     <!-- Logo & Page Title -->
     <div class="px-6 py-6" style="border-bottom: 2px solid #2a3f5f;">
@@ -57,7 +58,7 @@
                 </svg>
             </button>
 
-            <div x-show="inventoryOpen" x-transition class="ml-2 space-y-1 pl-4" style="border-left: 2px solid #2a3f5f;">
+            <div x-show="inventoryOpen" x-cloak x-transition class="ml-2 space-y-1 pl-4" style="border-left: 2px solid #2a3f5f;">
                 <a href="{{ route('admin.inventory.index') }}" class="block px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300" style="@if(request()->routeIs('admin.inventory.index'))background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); color: #ffffff;@else color: #b0bcc4;@endif" onmouseover="this.style.backgroundColor='rgba(15, 111, 221, 0.2)'; this.style.color='#ffffff';" onmouseout="@if(!request()->routeIs('admin.inventory.index'))this.style.backgroundColor='transparent'; this.style.color='#b0bcc4';@endif">📦 Products</a>
                 <a href="{{ route('admin.inventory.create') }}" class="block px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300" style="@if(request()->routeIs('admin.inventory.create'))background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); color: #ffffff;@else color: #b0bcc4;@endif" onmouseover="this.style.backgroundColor='rgba(15, 111, 221, 0.2)'; this.style.color='#ffffff';" onmouseout="@if(!request()->routeIs('admin.inventory.create'))this.style.backgroundColor='transparent'; this.style.color='#b0bcc4';@endif">➕ Add Product</a>
             </div>
@@ -125,7 +126,7 @@
             </button>
 
             <!-- Orders Dropdown Menu -->
-            <div x-show="ordersOpen" x-transition class="ml-2 space-y-1 pl-4" style="border-left: 2px solid rgba(59, 130, 246, 0.5);">
+            <div x-show="ordersOpen" x-cloak x-transition class="ml-2 space-y-1 pl-4" style="border-left: 2px solid rgba(59, 130, 246, 0.5);">
                 <!-- Pending -->
                 <a 
                     href="{{ route('admin.orders.pending') }}" 

@@ -219,6 +219,14 @@
             padding: 12px 14px;
             color: var(--white);
         }
+        /* Modal dropdowns use consistent light text, even when hovered/selected */
+        select.input,
+        select.input:focus,
+        select.input:hover { color: var(--white) !important; background-color: #0f1419 !important; }
+        select.input option,
+        select.input option:checked,
+        select.input option:active,
+        select.input option:hover { color: var(--white) !important; background-color: #1d2735 !important; }
         .input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,217,255,0.15); }
         .label { font-weight: 700; color: var(--text); margin-bottom: 6px; display: block; font-size: 13px; }
         .btn-primary { background: var(--blue); color: var(--white); border: 0; border-radius: 10px; padding: 12px 16px; font-weight: 800; }

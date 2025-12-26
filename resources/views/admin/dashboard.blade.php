@@ -81,52 +81,52 @@
         </div>
     </div>
 
-    <!-- Services Analytics -->
+    <!-- Revenue Trend (full width) -->
     <div class="rounded-xl shadow-lg p-6 mb-8" style="background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); border: 2px solid #2a3f5f;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); border: 2px solid #00d9ff;">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4m3-2h4m-2-2v4m3-2h4m-2-2v4M5 13v6m-2-3h4m3-3h4m-2-2v4m3-2h4m-2-2v4" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-white" style="letter-spacing: 0.5px;">Services Catalog</h3>
-                    <p class="text-sm" style="color:#94a3b8;">Track active offerings and options from the new CRUD.</p>
-                </div>
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); border: 2px solid #00d9ff;">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                </svg>
             </div>
-            <a href="{{ route('admin.services-management.index') }}" class="text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-300" style="background: rgba(0, 217, 255, 0.12); color: #00d9ff; border: 1px solid rgba(0, 217, 255, 0.35); text-decoration:none;" onmouseover="this.style.background='rgba(0, 217, 255, 0.2)'" onmouseout="this.style.background='rgba(0, 217, 255, 0.12)'">Manage services →</a>
+            <h3 class="text-lg font-semibold text-white" style="letter-spacing: 0.5px;">Revenue Trend (Last 7 Days)</h3>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="p-4 rounded-lg" style="background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%); border: 2px solid #2a3f5f;">
-                <p class="text-sm font-semibold" style="color:#b0bcc4;">Total services</p>
-                <p class="text-3xl font-bold" style="color:#00d9ff;">{{ $servicesTotal }}</p>
-            </div>
-            <div class="p-4 rounded-lg" style="background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); border: 2px solid #00d9ff;">
-                <p class="text-sm font-semibold text-white">Active</p>
-                <p class="text-3xl font-bold text-white">{{ $servicesActive }}</p>
-            </div>
-            <div class="p-4 rounded-lg" style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); border: 2px solid #66bb6a;">
-                <p class="text-sm font-semibold text-white">Options/variants</p>
-                <p class="text-3xl font-bold text-white">{{ $serviceOptionsCount }}</p>
-            </div>
+        <div class="h-96 flex items-center justify-center rounded-lg" style="background: rgba(15, 111, 221, 0.05); border: 1px solid rgba(42, 63, 95, 0.5); height: 28rem;">
+            <canvas id="revenueChart" style="width: 100%; height: 100%;"></canvas>
         </div>
     </div>
 
-    <!-- Revenue Chart & Quick Stats - Bento Grid Section 2 -->
+    <!-- Services & Inventory - Bento Grid Section 2 -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Revenue Chart (spans 2 columns) -->
+        <!-- Services Analytics (now spans 2 columns) -->
         <div class="lg:col-span-2 rounded-xl shadow-lg p-6" style="background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); border: 2px solid #2a3f5f;">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); border: 2px solid #00d9ff;">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                    </svg>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); border: 2px solid #00d9ff;">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4m3-2h4m-2-2v4m3-2h4m-2-2v4M5 13v6m-2-3h4m3-3h4m-2-2v4m3-2h4m-2-2v4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-white" style="letter-spacing: 0.5px;">Services Catalog</h3>
+                        <p class="text-sm" style="color:#94a3b8;">Track active offerings and options from the new CRUD.</p>
+                    </div>
                 </div>
-                <h3 class="text-lg font-semibold text-white" style="letter-spacing: 0.5px;">Revenue Trend (Last 7 Days)</h3>
+                <a href="{{ route('admin.services-management.index') }}" class="text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-300" style="background: rgba(0, 217, 255, 0.12); color: #00d9ff; border: 1px solid rgba(0, 217, 255, 0.35); text-decoration:none;" onmouseover="this.style.background='rgba(0, 217, 255, 0.2)'" onmouseout="this.style.background='rgba(0, 217, 255, 0.12)'">Manage services →</a>
             </div>
-            <div class="h-64 flex items-center justify-center rounded-lg" style="background: rgba(15, 111, 221, 0.05); border: 1px solid rgba(42, 63, 95, 0.5);">
-                <canvas id="revenueChart"></canvas>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 rounded-lg" style="background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%); border: 2px solid #2a3f5f;">
+                    <p class="text-sm font-semibold" style="color:#b0bcc4;">Total services</p>
+                    <p class="text-3xl font-bold" style="color:#00d9ff;">{{ $servicesTotal }}</p>
+                </div>
+                <div class="p-4 rounded-lg" style="background: linear-gradient(135deg, #0f6fdd 0%, #1a7fff 100%); border: 2px solid #00d9ff;">
+                    <p class="text-sm font-semibold text-white">Active</p>
+                    <p class="text-3xl font-bold text-white">{{ $servicesActive }}</p>
+                </div>
+                <div class="p-4 rounded-lg" style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); border: 2px solid #66bb6a;">
+                    <p class="text-sm font-semibold text-white">Options/variants</p>
+                    <p class="text-3xl font-bold text-white">{{ $serviceOptionsCount }}</p>
+                </div>
             </div>
         </div>
 
