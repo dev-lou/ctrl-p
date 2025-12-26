@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'CICT Merch Hub - Student Council Merchandise')</title>
+    <title>@yield('title', 'Ctrl+P')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/ctrlp-logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/ctrlp-logo.png') }}">
 
     <!-- Styles -->
     @include('components.vite-assets')
@@ -198,62 +201,56 @@
             {{ $slot }}
         </main>
 
-        <!-- Footer -->
-        <footer style="background: transparent; color: var(--color-text-muted); border-top: none;" class="py-12 mt-0 animated-gradient-section">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    <!-- Brand -->
-                    <div>
-                        <h3 style="color: #daa520;" class="font-bold text-lg mb-4">👑 CICT MERCH</h3>
-                        <p class="text-sm" style="color: rgba(255, 255, 255, 0.8);">ISFUST Dingle Campus CICT Student Council</p>
+        @unless(request()->is('admin*'))
+        <!-- Footer (customer-facing) -->
+        <footer style="background: linear-gradient(135deg, rgba(6, 11, 20, 0.95) 0%, rgba(15, 23, 42, 0.96) 100%); color: rgba(255, 255, 255, 0.92); border-top: none;" class="py-16 mt-0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-12" style="align-items:flex-start;">
+                    <div class="col-span-1" style="display:flex; align-items:flex-start; gap:22px;">
+                        <div style="width:92px; height:92px; border-radius:9999px; padding:6px; background:#fff; box-shadow: 0 12px 28px rgba(0,0,0,0.3); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:80px; height:80px; border-radius:9999px; overflow:hidden; background:#fff;">
+                                <img src="{{ asset('images/ctrlp-logo.png') }}" alt="Ctrl+P logo" style="width:100%; height:100%; object-fit:cover; border-radius:9999px; display:block;">
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <h3 class="font-bold text-xl" style="margin:0; color:white;">Ctrl+P</h3>
+                                <p class="text-sm" style="margin:2px 0 0 0; color: rgba(255,255,255,0.75);">ISUFST Dingle Campus · Shop & Services</p>
+                            </div>
+                            <p class="text-sm" style="margin:0; color: rgba(255,255,255,0.75); line-height:1.7; max-width: 22rem;">Campus-run store and services delivering print, merch, and digital support for students and orgs.</p>
+                        </div>
                     </div>
 
-                    <!-- Quick Links -->
-                    <div>
-                        <h4 style="color: white;" class="font-semibold text-sm mb-4">Shop</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="{{ route('shop.index') }}" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">🛍️ Merchandise</a></li>
-                            <li><a href="{{ route('services.index') }}" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">📞 Services</a></li>
-                            <li><a href="{{ route('cart.index') }}" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">🛒 Cart</a></li>
-                        </ul>
+                    <div class="col-span-1 flex flex-col gap-6" style="margin-top:0;" class="md:mt-0">
+                        <div style="padding:16px; border-radius:14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); display:flex; align-items:flex-start; gap:12px; align-self:flex-end; max-width:420px; width:100%;">
+                            <span style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background: linear-gradient(135deg,#8B0000,#A00000); color:white; box-shadow: 0 8px 20px rgba(0,0,0,0.18);">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" style="width:20px; height:20px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.25c-2.548 0-4.93-.862-6.772-2.25a.75.75 0 0 1-.228-.834l1.115-3.34a.75.75 0 0 1 .713-.519h1.547A.75.75 0 0 0 9.125 10v-.25A3.625 3.625 0 0 1 12.75 6.125h1.25A3.625 3.625 0 0 1 17.625 9.75v.25a.75.75 0 0 0 .75.75h1.547a.75.75 0 0 1 .713.519l1.115 3.34a.75.75 0 0 1-.228.834A12.433 12.433 0 0 1 12 18.25Z" />
+                                </svg>
+                            </span>
+                            <div>
+                                <p class="text-sm" style="color:white; margin:0; font-weight:600;">Support</p>
+                                <p class="text-sm" style="margin:8px 0 0 0; color: rgba(255,255,255,0.78);">Need help? Ask the chatbot on the bottom-right — it is always on.</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Account -->
-                    <div>
-                        <h4 style="color: white;" class="font-semibold text-sm mb-4">Account</h4>
-                        <ul class="space-y-2 text-sm">
-                            @auth
-                                <li><a href="{{ route('profile.edit') }}" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">👤 Profile</a></li>
-                                <li><a href="{{ route('account.orders') }}" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">📦 My Orders</a></li>
-                            @else
-                                <li><a href="{{ route('login') }}" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">Sign In</a></li>
-                                <li><a href="{{ route('register') }}" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">Create Account</a></li>
-                            @endauth
-                        </ul>
-                    </div>
-
-                    <!-- Contact -->
-                    <div>
-                        <h4 style="color: white;" class="font-semibold text-sm mb-4">Support</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="#" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">❓ Help Center</a></li>
-                            <li><a href="#" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">📧 Contact Us</a></li>
-                            <li><a href="#" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors hover:opacity-100">🔒 Privacy</a></li>
-                        </ul>
+                    <div class="md:col-span-12 flex flex-col gap-4" style="margin-top:16px;" class="md:mt-0">
+                        <h4 class="font-semibold text-sm" style="color:white;">Credits</h4>
+                        <div class="flex flex-wrap gap-3 text-sm" style="color: rgba(255, 255, 255, 0.92);">
+                            <span style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); padding: 12px 14px; border-radius: 14px; font-weight: 700;">Lou Vincent Baroro — Developer</span>
+                            <span style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); padding: 12px 14px; border-radius: 14px; font-weight: 700;">Karl Calitamon — UX/UI Designer</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Bottom -->
-                <div style="border-top: 1px solid rgba(218, 165, 32, 0.3);" class="pt-8 flex flex-col sm:flex-row justify-between items-center">
-                    <p class="text-sm" style="color: rgba(255, 255, 255, 0.8);">&copy; 2025 CICT Merch Hub. All rights reserved. | ISFUST Dingle Campus</p>
-                    <div class="flex gap-6 mt-4 sm:mt-0 text-sm" style="color: rgba(255, 255, 255, 0.8);">
-                        <a href="#" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors">Terms</a>
-                        <a href="#" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors">Privacy</a>
-                        <a href="#" style="color: rgba(255, 255, 255, 0.8);" class="hover:text-accent transition-colors">Cookies</a>
-                    </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap;" class="pt-4 text-sm flex flex-col sm:flex-row items-center sm:items-center sm:justify-between gap-2 sm:gap-4">
+                    <p style="margin:0; color: rgba(255,255,255,0.75);">&copy; 2025 Ctrl+P · ISUFST Dingle Campus</p>
+                    <p style="margin:0; color: rgba(255,255,255,0.65);" class="text-xs">All rights reserved.</p>
                 </div>
             </div>
         </footer>
+        @endunless
     </div>
 
     <!-- Toast Notification Component -->

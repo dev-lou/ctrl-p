@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Service;
 use App\Services\SupabaseFallback;
 use App\DTO\FallbackProduct;
 use Illuminate\Support\Facades\Cache;
@@ -56,8 +57,20 @@ class HomepageController extends Controller
             }
         }
 
+        $serviceCategories = Service::active()
+            ->ordered()
+            ->get()
+            ->groupBy(fn ($service) => $service->category ?: 'General')
+            ->map(fn ($group) => [
+                'name' => $group->first()->category ?: 'General',
+                'count' => $group->count(),
+                'description' => $group->first()->category_description,
+            ])
+            ->values();
+
         return view('home.homepage', [
             'featuredProducts' => $featuredProducts,
+            'serviceCategories' => $serviceCategories,
         ]);
     }
 }

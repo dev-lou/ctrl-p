@@ -2,14 +2,14 @@
 
 - **Frontend:** Blade templates with Vite 7 build; Tailwind CSS 4 (via `@tailwindcss/vite`); Axios 1.11 for AJAX; no heavy framework (plain JS); compiled assets in `public/build`; optional Supabase-hosted media rendered via URLs; Laravel Breeze-auth views.  
 - **Backend:** PHP 8.2, Laravel 11; Breeze auth scaffolding; Eloquent ORM with custom `NeonPostgresConnector` for PostgreSQL (Neon) and SQLite for local; DomPDF (`barryvdh/laravel-dompdf`) for receipts; Spatie Activity Log for auditing; Flysystem AWS S3 v3 for Supabase storage; queue/listeners via Laravel defaults; GeminiChatService for LLM chat.  
-- **Database:** Primary via Eloquent (PostgreSQL target); migrations define products, variants, orders, order_items, reviews, notifications, buy_list_items, inventory_histories, audit_logs, announcements, settings, sessions, users, cache. Fallback read paths to Supabase REST for products/announcements when DB unavailable.  
+- **Database:** Primary via Eloquent (PostgreSQL target); migrations define products, variants, orders, order_items, reviews, notifications, buy_list_items, inventory_histories, audit_logs, announcements, settings, sessions, users, cache. Fallback read paths to Supabase REST for products when DB unavailable.  
 - **Libraries & Services:** Google Gemini API (chat/diagnostics); Supabase Storage (S3-compatible) for product images and receipts; DomPDF for PDF receipts; Laravel Cache for homepage data; Health checks `/healthz`; Artisan commands `PrimeCache`, `TestInventorySystem`.  
 - **DevOps:** Dockerfile bases on `php:8.2-apache` with Node 20, opcache, gd, mbstring, pgsql extensions; Vite build in container; Render deployment scripts; npm `fix_manifest.js` post-build.
 
 ## System Workflows (Business Logic)
 
 - **Authentication (Breeze + custom routes):** Guest visits `/login` or `/register` -> credentials validated -> `Auth::attempt` on login regenerates session; role check redirects admins to `/admin/dashboard`, customers to `/`; logout via POST `/logout` clears session.  
-- **Homepage & Catalog Browse:** `/` and `/home` controllers fetch announcements + featured products (cached; Supabase REST fallback) -> render `home.*` views; `/shop` lists active products with search/sort/pagination; fallback to Supabase REST if DB unavailable.  
+- **Homepage & Catalog Browse:** `/` and `/home` controllers fetch featured products (cached; Supabase REST fallback) -> render `home.*` views; `/shop` lists active products with pagination; fallback to Supabase REST if DB unavailable.  
 - **Product Detail & Reviews:** `/shop/{product}` loads product, variants, reviews, average ratings, related products; checks prior completed orders to allow reviewing; rating breakdown computed; review CRUD guarded to owner with verified purchase check.  
 - **Cart:** Authenticated users add/update/remove items stored in session (`CartController@store/update/destroy/clear`); cart page rebuilds items with current prices/variants to compute totals.  
 - **Checkout & Order Placement:** `/checkout` shows summary from session cart; POST `/checkout` validates cart (optionally accepts JSON `cart_payload`), re-fetches products/variants, checks stock, calculates totals, writes `orders` and `order_items` rows (direct DB insert), clears cart, redirects to `orders.show`.  

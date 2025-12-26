@@ -22,6 +22,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\ServicesController;
+use App\Http\Controllers\Admin\ServiceManagementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -137,9 +139,8 @@ Route::get('/shop', [ProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product}', [ProductController::class, 'show'])->name('shop.show');
 
 // Services Routes
-Route::get('/services', function () {
-    return view('services.index');
-})->name('services.index');
+Route::get('/services', [ServicesController::class, 'index'])->name('services.index');
+Route::get('/services/{service:slug}', [ServicesController::class, 'show'])->name('services.show');
 
 // Contact Routes
 Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
@@ -219,6 +220,25 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{product}/edit', [InventoryProductController::class, 'edit'])->name('edit');
         Route::patch('/{product}', [InventoryProductController::class, 'update'])->name('update');
         Route::delete('/{product}', [InventoryProductController::class, 'destroy'])->name('destroy');
+    });
+
+    // ========================================================================
+    // Services Management Routes
+    // ========================================================================
+    Route::prefix('services-management')->name('services-management.')->group(function () {
+        Route::get('/', [ServiceManagementController::class, 'index'])->name('index');
+        Route::post('/', [ServiceManagementController::class, 'store'])->name('store');
+        Route::patch('/{service}', [ServiceManagementController::class, 'update'])->name('update');
+        Route::delete('/{service}', [ServiceManagementController::class, 'destroy'])->name('destroy');
+        Route::patch('/{service}/toggle', [ServiceManagementController::class, 'toggleStatus'])->name('toggle');
+
+        Route::post('/{service}/options', [ServiceManagementController::class, 'storeOption'])->name('options.store');
+        Route::patch('/options/{option}', [ServiceManagementController::class, 'updateOption'])->name('options.update');
+        Route::delete('/options/{option}', [ServiceManagementController::class, 'destroyOption'])->name('options.destroy');
+
+        Route::post('/officers', [ServiceManagementController::class, 'storeOfficer'])->name('officers.store');
+        Route::patch('/officers/{officer}', [ServiceManagementController::class, 'updateOfficer'])->name('officers.update');
+        Route::delete('/officers/{officer}', [ServiceManagementController::class, 'destroyOfficer'])->name('officers.destroy');
     });
     
     // ========================================================================

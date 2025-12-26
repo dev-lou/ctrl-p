@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 
 class CheckoutController extends Controller
@@ -222,6 +224,25 @@ class CheckoutController extends Controller
                     'updated_at' => now(),
                 ]);
                 \Log::info('Order item created', ['order_id' => $orderId, 'product_id' => $itemData['product_id']]);
+            }
+
+            // Decrement stock (product or variant) in real time, skipping null/unlimited stock
+            foreach ($order_items as $itemData) {
+                if (!empty($itemData['product_variant_id'])) {
+                    $variant = $variants->get($itemData['product_variant_id']);
+                    if ($variant && !is_null($variant->stock_quantity)) {
+                        $newStock = max(0, $variant->stock_quantity - $itemData['quantity']);
+                        ProductVariant::where('id', $variant->id)->update(['stock_quantity' => $newStock]);
+                        \Log::info('Variant stock decremented', ['variant_id' => $variant->id, 'from' => $variant->stock_quantity, 'to' => $newStock]);
+                    }
+                } else {
+                    $product = $products->get($itemData['product_id']);
+                    if ($product && !is_null($product->current_stock)) {
+                        $newStock = max(0, $product->current_stock - $itemData['quantity']);
+                        Product::where('id', $product->id)->update(['current_stock' => $newStock]);
+                        \Log::info('Product stock decremented', ['product_id' => $product->id, 'from' => $product->current_stock, 'to' => $newStock]);
+                    }
+                }
             }
             
             // Clear cart

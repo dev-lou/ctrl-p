@@ -1,113 +1,128 @@
-<x-app-layout>
-    @section('title', 'Notifications - ' . config('app.name'))
+<x-app-layout :title="'Notifications - Ctrl+P'">
+    <style>
+        :root {
+            --ink: #0f172a;
+            --muted: #475569;
+            --surface: #ffffff;
+            --border: rgba(15,23,42,0.08);
+            --accent: #8B0000;
+            --accent-2: #A00000;
+            --bg: #f8fafc;
+        }
 
-    <!-- Decorative Red Header Banner (Behind Navbar) -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; height: 280px; background: linear-gradient(135deg, #8B0000 0%, #A00000 40%, #6B0000 100%); z-index: 0; overflow: hidden;">
-        <div style="position: absolute; inset: 0; opacity: 0.08; background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, #FFFAF1, transparent);"></div>
-        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        <div style="position: absolute; top: 60px; right: 150px; width: 100px; height: 100px; background: rgba(255,255,255,0.03); border-radius: 50%;"></div>
-        <div style="position: absolute; top: 20px; left: 10%; width: 150px; height: 150px; background: rgba(255,255,255,0.04); border-radius: 50%;"></div>
-    </div>
+        body { background: var(--bg) !important; }
 
-    <div style="background: #FFFAF1; min-height: 100vh; padding-top: 140px; padding-bottom: 80px; position: relative; z-index: 1;">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Header -->
-            <div class="mb-8 flex items-center justify-between">
-                <div>
-                    <h1 style="font-size: 2.5rem; font-weight: 800; color: #1a1a1a; margin-bottom: 8px;">🔔 Notifications</h1>
-                    <p style="color: #666666; font-size: 15px;">Stay updated with your order status changes</p>
-                </div>
-                @if($notifications->where('is_read', false)->count() > 0)
-                    <button onclick="markAllAsRead()" style="background: #8B0000; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
-                        Mark All as Read
-                    </button>
+        .shell { max-width: 900px; margin: 0 auto; padding: 120px 20px 80px; }
+        .hero { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:18px; }
+        .hero h1 { margin:0; font-size:32px; font-weight:800; color:var(--ink); }
+        .hero p { margin:6px 0 0 0; color:var(--muted); line-height:1.6; }
+        .eyebrow { text-transform: uppercase; letter-spacing:0.18em; font-size:11px; font-weight:700; color:var(--accent); margin:0; }
+
+        .pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(139,0,0,0.08); color:var(--accent); font-weight:800; font-size:12px; }
+        .hero-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .btn { padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:#fff; font-weight:700; cursor:pointer; color:var(--ink); text-decoration:none; }
+        .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; border:none; box-shadow:0 10px 30px rgba(139,0,0,0.16); }
+        .btn:hover { transform: translateY(-1px); box-shadow:0 8px 20px rgba(15,23,42,0.08); }
+
+        .list { display:grid; gap:12px; }
+        .card { background: var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; display:flex; gap:12px; align-items:flex-start; box-shadow:0 12px 36px rgba(15,23,42,0.05); }
+        .card.unread { border-left:4px solid var(--accent); background: #fff9f5; }
+        .icon { width:46px; height:46px; border-radius:12px; display:grid; place-items:center; font-size:22px; font-weight:700; }
+        .content h3 { margin:0 0 6px 0; font-size:16px; font-weight:800; color:var(--ink); }
+        .content p { margin:0 0 8px 0; color:var(--muted); font-size:14px; line-height:1.6; }
+        .meta { display:flex; gap:14px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--muted); font-weight:600; }
+        .meta a { color:var(--accent); font-weight:700; }
+        .actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
+        .mini { padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:#fff; font-weight:700; font-size:12px; cursor:pointer; color:var(--ink); }
+        .mini:hover { border-color: var(--accent); color: var(--accent); }
+
+        .empty { text-align:center; padding:50px 20px; border:1px dashed var(--border); border-radius:16px; background:#fff; color:var(--muted); }
+        .empty h3 { margin:10px 0 6px 0; font-size:18px; font-weight:800; color:var(--ink); }
+
+        @media(max-width: 640px) {
+            .card { flex-direction:column; }
+            .actions { width:100%; justify-content:flex-start; }
+        }
+    </style>
+
+    <div class="shell">
+        @php $unreadCount = $notifications->where('is_read', false)->count(); @endphp
+        <div class="hero">
+            <div>
+                <p class="eyebrow">Inbox</p>
+                <h1>Notifications</h1>
+                <p>Order updates, status changes, and reminders live here.</p>
+            </div>
+            <div class="hero-actions">
+                <span class="pill">Unread {{ $unreadCount }}</span>
+                @if($unreadCount > 0)
+                    <button class="btn primary" onclick="markAllAsRead()">Mark all as read</button>
                 @endif
             </div>
+        </div>
 
-            <!-- Notifications List -->
+        <div class="list">
             @forelse($notifications as $notification)
-                <div class="notification-card {{ $notification->is_read ? 'read' : 'unread' }}" style="background: white; border: 1px solid #F0F0F0; border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: all 0.3s ease;">
-                    <div style="display: flex; gap: 16px; align-items: start;">
-                        <!-- Icon -->
-                        <div style="flex-shrink: 0;">
-                            @if($notification->type === 'order_completed')
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #D4EDDA; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-                                    ✅
-                                </div>
-                            @elseif($notification->type === 'order_status_changed')
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #FFF3CD; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-                                    🔄
-                                </div>
-                            @else
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #D1ECF1; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-                                    🔔
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- Content -->
-                        <div style="flex-grow: 1;">
-                            <h3 style="font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px;">
-                                {{ $notification->title }}
-                            </h3>
-                            <p style="color: #666666; font-size: 14px; margin-bottom: 8px; line-height: 1.5;">
-                                {{ $notification->message }}
-                            </p>
-                            <div style="display: flex; gap: 16px; align-items: center;">
-                                <span style="color: #999999; font-size: 13px;">
-                                    {{ $notification->created_at->diffForHumans() }}
-                                </span>
-                                @if($notification->data && isset($notification->data['order_id']))
-                                    <a href="{{ route('orders.show', $notification->data['order_id']) }}" style="color: #8B0000; font-size: 13px; font-weight: 600; text-decoration: none;">
-                                        View Order →
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-
-                        <!-- Actions -->
-                        <div style="flex-shrink: 0; display: flex; gap: 8px;">
-                            @if(!$notification->is_read)
-                                <button onclick="markAsRead({{ $notification->id }})" style="padding: 6px 12px; background: #F0F0F0; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">
-                                    Mark as Read
-                                </button>
+                @php
+                    $icon = '🔔';
+                    $tint = '#e0f2fe';
+                    if ($notification->type === 'order_completed') {
+                        $icon = '✅';
+                        $tint = '#dcfce7';
+                    } elseif ($notification->type === 'order_status_changed') {
+                        $icon = '🔄';
+                        $tint = '#fef9c3';
+                    }
+                @endphp
+                <article class="card {{ $notification->is_read ? 'read' : 'unread' }}">
+                    <div class="icon" style="background: {{ $tint }};">{{ $icon }}</div>
+                    <div class="content">
+                        <h3>{{ $notification->title }}</h3>
+                        <p>{{ $notification->message }}</p>
+                        <div class="meta">
+                            <span>{{ $notification->created_at->diffForHumans() }}</span>
+                            @if($notification->data && isset($notification->data['order_id']))
+                                <a href="{{ route('orders.show', $notification->data['order_id']) }}">View order</a>
                             @endif
                         </div>
                     </div>
-                </div>
+                    <div class="actions">
+                        @if(!$notification->is_read)
+                            <button class="mini" onclick="markAsRead({{ $notification->id }}, this)">Mark read</button>
+                        @endif
+                    </div>
+                </article>
             @empty
-                <div style="background: white; border: 1px solid #F0F0F0; border-radius: 12px; padding: 60px; text-align: center;">
-                    <div style="font-size: 64px; margin-bottom: 16px;">🔕</div>
-                    <h3 style="font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px;">No Notifications</h3>
-                    <p style="color: #666666;">You're all caught up! We'll notify you when there are updates.</p>
+                <div class="empty">
+                    <div style="font-size:48px;">🔕</div>
+                    <h3>Nothing new</h3>
+                    <p>We will let you know when there are updates.</p>
                 </div>
             @endforelse
-
-            <!-- Pagination -->
-            @if($notifications->hasPages())
-                <div class="mt-8">
-                    {{ $notifications->links() }}
-                </div>
-            @endif
         </div>
+
+        @if($notifications->hasPages())
+            <div style="margin-top:16px;">
+                {{ $notifications->links() }}
+            </div>
+        @endif
     </div>
 
     <script>
-        function markAsRead(notificationId) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        function markAsRead(notificationId, button) {
+            if (button) { button.disabled = true; }
             fetch(`/notifications/${notificationId}/read`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': csrfToken,
                 },
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                }
-            });
+            .then(data => { if (data.success) location.reload(); })
+            .catch(() => { if (button) { button.disabled = false; } });
         }
 
         function markAllAsRead() {
@@ -115,27 +130,11 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': csrfToken,
                 },
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                }
-            });
+            .then(data => { if (data.success) location.reload(); });
         }
     </script>
-
-    <style>
-        .notification-card.unread {
-            border-left: 4px solid #8B0000;
-            background: #FFFBF5 !important;
-        }
-
-        .notification-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transform: translateY(-2px);
-        }
-    </style>
 </x-app-layout>

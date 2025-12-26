@@ -3,562 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Receipt #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Receipt #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        #receipt-content {
-            background: white;
-            max-width: 380px;
-            margin: 0 auto;
-            padding: 20px 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0,0,0,0.05);
-            page-break-inside: avoid;
-            position: relative;
+        :root {
+            --ink: #0f172a;
+            --muted: #475569;
+            --border: rgba(15,23,42,0.08);
+            --accent: #8B0000;
+            --surface: #ffffff;
+            --bg: #f8fafc;
         }
 
-        #receipt-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #8B0000 0%, #FFD700 100%);
-        }
+        body { background: var(--bg); margin:0; padding:24px; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .page { max-width: 900px; margin: 0 auto; }
+        .actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-bottom:14px; }
+        .btn { padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:#fff; font-weight:700; cursor:pointer; text-decoration:none; color:var(--ink); }
+        .btn.primary { background: linear-gradient(135deg, var(--accent), #A00000); color:#fff; border:none; box-shadow:0 12px 36px rgba(139,0,0,0.15); }
+        .btn.secondary { color: var(--accent); border-color: var(--accent); }
+        .btn:disabled { opacity:0.7; cursor:not-allowed; }
 
-        .receipt-header {
-            text-align: center;
-            padding-bottom: 12px;
-            margin-bottom: 12px;
-            border-bottom: 2px dashed #ddd;
-        }
+        .paper { background: var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:0 20px 60px rgba(15,23,42,0.08); padding:28px; }
+        .header { display:flex; justify-content:space-between; gap:16px; border-bottom:2px solid var(--border); padding-bottom:14px; margin-bottom:14px; }
+        .brand { font-weight:900; font-size:22px; color:var(--accent); letter-spacing:-0.3px; }
+        .tagline { color:var(--muted); font-size:12px; margin-top:4px; }
+        .title { text-align:center; margin:10px 0 4px 0; font-size:22px; font-weight:900; color:var(--ink); }
+        .subline { text-align:center; color:var(--muted); font-weight:700; font-size:13px; margin:0 0 18px 0; }
 
-        .company-name {
-            color: #1a1a1a;
-            font-size: 22px;
-            font-weight: 900;
-            margin: 0 0 4px 0;
-            letter-spacing: 0.5px;
-        }
+        .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin-bottom:18px; }
+        .panel { border:1px solid var(--border); border-radius:12px; padding:12px; }
+        .label { text-transform: uppercase; letter-spacing:0.14em; font-size:11px; font-weight:800; color:var(--muted); margin-bottom:6px; }
+        .value { font-weight:800; color:var(--ink); font-size:15px; }
+        .value.small { font-weight:700; color:var(--muted); font-size:13px; }
 
-        .company-tagline {
-            color: #666;
-            font-size: 11px;
-            font-weight: 500;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        table { width:100%; border-collapse:collapse; margin-top:4px; }
+        thead th { text-align:left; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); padding:10px 8px; border-bottom:1px solid var(--border); }
+        tbody td { padding:10px 8px; font-size:13px; color:var(--ink); border-bottom:1px solid var(--border); }
+        .text-right { text-align:right; }
+        .text-center { text-align:center; }
+        .muted { color:var(--muted); font-weight:600; font-size:12px; }
 
-        .receipt-title {
-            text-align: center;
-            margin: 10px 0;
-            padding: 8px 0;
-            background: linear-gradient(135deg, rgba(139, 0, 0, 0.05) 0%, rgba(255, 215, 0, 0.05) 100%);
-            border-radius: 6px;
-        }
+        .totals { margin-top:14px; border-top:1px solid var(--border); padding-top:10px; }
+        .total-row { display:flex; justify-content:flex-end; gap:16px; padding:6px 0; font-weight:700; color:var(--muted); }
+        .total-row strong { color:var(--ink); min-width:140px; text-align:right; }
+        .grand { font-size:18px; color:var(--accent); }
 
-        .receipt-title h1 {
-            color: #1a1a1a;
-            font-size: 16px;
-            font-weight: 800;
-            margin: 0 0 4px 0;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-        }
-
-        .order-number {
-            color: #8B0000;
-            font-size: 13px;
-            font-weight: 700;
-            font-family: 'Courier New', monospace;
-            margin: 0;
-        }
-
-        .info-section {
-            margin: 10px 0;
-            padding: 8px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 12px;
-        }
-
-        .info-label {
-            color: #666;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 10px;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value {
-            color: #1a1a1a;
-            font-weight: 700;
-            font-size: 12px;
-        }
-
-        .items-section {
-            margin: 10px 0;
-            padding: 8px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-
-        .section-header {
-            color: #1a1a1a;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .item {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px dotted #eee;
-        }
-
-        .item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .item-name {
-            color: #1a1a1a;
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .item-variant {
-            color: #666;
-            font-size: 11px;
-            margin-bottom: 6px;
-        }
-
-        .item-details {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-        }
-
-        .item-qty {
-            color: #666;
-            font-weight: 600;
-        }
-
-        .item-price {
-            color: #1a1a1a;
-            font-weight: 700;
-        }
-
-        .item-total {
-            color: #8B0000;
-            font-weight: 800;
-            font-size: 13px;
-        }
-
-        .totals-section {
-            margin: 10px 0;
-            padding: 10px 0 8px 0;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 13px;
-        }
-
-        .total-row.final {
-            margin-top: 8px;
-            padding: 12px 0 8px 0;
-            border-top: 2px solid #1a1a1a;
-            font-size: 16px;
-        }
-
-        .total-label {
-            color: #666;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-        }
-
-        .total-label.final-label {
-            color: #1a1a1a;
-            font-weight: 800;
-            font-size: 13px;
-        }
-
-        .total-value {
-            color: #1a1a1a;
-            font-weight: 700;
-        }
-
-        .total-value.final {
-            color: #8B0000;
-            font-weight: 900;
-            font-size: 20px;
-            letter-spacing: -0.5px;
-        }
-
-        .barcode-section {
-            margin: 12px 0;
-            padding: 10px 0;
-            text-align: center;
-            border-top: 1px dashed #ddd;
-            border-bottom: 1px dashed #ddd;
-        }
-
-        .barcode-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .barcode {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 2px;
-            height: 60px;
-            background: white;
-            padding: 8px 0;
-            width: 100%;
-        }
-
-        .barcode-bar {
-            background: #000;
-            width: 100%;
-            border-radius: 0;
-            flex: 1;
-        }
-
-        .barcode-number {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            font-size: 14px;
-            letter-spacing: 3px;
-            color: #1a1a1a;
-            margin-top: 6px;
-        }
-
-        .footer-section {
-            text-align: center;
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 2px dashed #ddd;
-        }
-
-        .thank-you {
-            color: #1a1a1a;
-            font-size: 14px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .footer-text {
-            color: #666;
-            font-size: 10px;
-            line-height: 1.6;
-            margin: 6px 0;
-        }
-
-        .timestamp {
-            color: #999;
-            font-size: 10px;
-            margin-top: 12px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            background: white;
-            padding: 16px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-            max-width: 380px;
-            margin: 0 auto 20px auto;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #8B0000 0%, #A00000 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(139, 0, 0, 0.25);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #A00000 0%, #B00000 100%);
-            box-shadow: 0 8px 20px rgba(139, 0, 0, 0.35);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #8B0000;
-            border: 2px solid #8B0000;
-        }
-
-        .btn-secondary:hover {
-            background: #8B0000;
-            color: white;
-            transform: translateY(-2px);
-        }
+        .barcode { margin-top:16px; padding:12px; border:1px dashed var(--border); border-radius:10px; text-align:center; color:var(--muted); font-weight:700; }
+        .footer { margin-top:16px; border-top:1px solid var(--border); padding-top:10px; color:var(--muted); font-weight:600; font-size:12px; text-align:center; }
 
         @media print {
-            body {
-                background: white;
-                padding: 0;
-                margin: 0;
-            }
-
-            #receipt-content {
-                box-shadow: none;
-                padding: 12px 16px;
-                margin: 0 auto;
-                max-width: 380px;
-                page-break-inside: avoid;
-            }
-
-            #receipt-content::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 6px;
-                background: linear-gradient(90deg, #8B0000 0%, #FFD700 100%);
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .action-buttons {
-                display: none !important;
-            }
-
-            .barcode {
-                background: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .barcode-bar {
-                background: #000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            @page {
-                margin: 10mm;
-                size: A4;
-            }
-        }
-
-        @media (max-width: 640px) {
-            body {
-                padding: 10px;
-            }
-
-            #receipt-content {
-                padding: 24px 20px;
-                max-width: 100%;
-            }
-
-            .action-buttons {
-                max-width: 100%;
-            }
+            body { background:#fff; padding:0; }
+            .actions { display:none !important; }
+            .page { padding:0; margin:0; }
+            .paper { box-shadow:none; border:1px solid #d1d5db; border-radius:0; }
+            @page { size: A4; margin: 12mm; }
         }
     </style>
 </head>
 <body>
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-        <a href="{{ route('account.orders') }}" class="btn btn-secondary">← Back</a>
-        <button onclick="printReceipt()" class="btn btn-primary">🖨️ Print</button>
-        <button onclick="generatePDF()" class="btn btn-primary">📥 Download</button>
-    </div>
-
-    <div id="receipt-content">
-        <!-- Receipt Header -->
-        <div class="receipt-header">
-            <p class="company-name">🏪 {{ config('app.name', 'IGP Hub') }}</p>
-            <p class="company-tagline">Student Council Store</p>
-            <p class="footer-text" style="margin-top: 8px;">ISUFST Dingle Campus</p>
+    <div class="page">
+        <div class="actions">
+            <a href="{{ route('account.orders') }}" class="btn secondary">Back to orders</a>
+            <button class="btn" onclick="window.print()">Print</button>
+            <button class="btn primary" id="pdf-btn" onclick="generatePDF(event)">Download PDF</button>
         </div>
 
-        <!-- Receipt Title -->
-        <div class="receipt-title">
-            <h1>Order Receipt</h1>
-            <p class="order-number">#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</p>
-        </div>
-
-        <!-- Order Info -->
-        <div class="info-section">
-            <div class="info-row">
-                <span class="info-label">Customer:</span>
-                <span class="info-value">{{ $order->customer ? $order->customer->name : auth()->user()->name }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Date:</span>
-                <span class="info-value">{{ $order->created_at->format('M d, Y g:i A') }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Status:</span>
-                <span class="info-value" style="color: #8B0000;">{{ strtoupper($order->status) }}</span>
-            </div>
-        </div>
-
-        <!-- Items -->
-        <div class="items-section">
-            <div class="section-header">Items Ordered</div>
-            @foreach($order->items as $item)
-                <div class="item">
-                    <div class="item-name">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</div>
-                    @if($item->variant || $item->variant_name)
-                        <div class="item-variant">Variant: {{ optional($item->variant)->name ?? $item->variant_name }}</div>
-                    @endif
-                    <div class="item-details">
-                        <span class="item-qty">{{ $item->quantity }} x ₱{{ number_format($item->unit_price, 2) }}</span>
-                        <span class="item-total">₱{{ number_format($item->total_price, 2) }}</span>
-                    </div>
+        <div class="paper" id="receipt-content">
+            <div class="header">
+                <div>
+                    <div class="brand">{{ config('app.name', 'IGP Hub') }}</div>
+                    <div class="tagline">Official receipt • CICT Student Council Office</div>
                 </div>
-            @endforeach
-        </div>
-
-        <!-- Totals -->
-        <div class="totals-section">
-            <div class="total-row">
-                <span class="total-label">Subtotal:</span>
-                <span class="total-value">₱{{ number_format($order->items->sum('total_price'), 2) }}</span>
-            </div>
-            @if($order->discount > 0)
-                <div class="total-row">
-                    <span class="total-label">Discount:</span>
-                    <span class="total-value" style="color: #4CAF50;">-₱{{ number_format($order->discount, 2) }}</span>
+                <div style="text-align:right;">
+                    <div class="value">Order #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</div>
+                    <div class="value small">{{ $order->created_at->format('M d, Y \a\t g:i A') }}</div>
                 </div>
-            @endif
-            <div class="total-row final">
-                <span class="total-label final-label">Total:</span>
-                <span class="total-value final">₱{{ number_format($order->total, 2) }}</span>
             </div>
-        </div>
 
-        <!-- Barcode -->
-        <div class="barcode-section">
-            <div class="barcode-container">
-                <div class="barcode">
-                    @php
-                        // Generate more bars for fuller width coverage - fake barcode pattern
-                        $heights = [75, 45, 85, 55, 90, 40, 80, 60, 95, 50, 70, 88, 42, 78, 65, 92, 48, 82, 58, 86, 52, 76, 68, 84, 62, 94, 46, 72, 56, 89, 64, 81, 54, 91, 44, 74, 66, 87, 57, 93, 51, 79, 63, 83, 59, 77, 67, 85, 53, 88, 61, 96, 47, 73, 69, 82, 55, 90, 49, 71, 65, 86, 58, 92, 52, 78, 64, 88, 56, 84, 60, 94, 48, 76, 62, 89, 54, 81, 66, 91, 50, 75, 68, 87, 57, 93];
-                    @endphp
-                    @foreach($heights as $height)
-                        <div class="barcode-bar" style="height: {{ $height }}%;"></div>
-                    @endforeach
+            <div class="title">Payment Receipt</div>
+            <div class="subline">Status: {{ ucfirst($order->status) }}</div>
+
+            <div class="grid">
+                <div class="panel">
+                    <div class="label">Bill to</div>
+                    <div class="value">{{ $order->customer ? $order->customer->name : auth()->user()->name }}</div>
+                    <div class="value small">{{ $order->customer ? $order->customer->email : auth()->user()->email }}</div>
                 </div>
-                <div class="barcode-number">*{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}*</div>
+                <div class="panel">
+                    <div class="label">Fulfillment</div>
+                    <div class="value">Pickup</div>
+                    <div class="value small">CICT Student Council Office · Mon–Fri, 8:00 AM – 5:00 PM</div>
+                </div>
+                <div class="panel">
+                    <div class="label">Reference</div>
+                    <div class="value">{{ strtoupper(substr(md5($order->id . $order->created_at), 0, 8)) }}</div>
+                    <div class="value small">Keep this for verification</div>
+                </div>
             </div>
-        </div>
 
-        <!-- Footer -->
-        <div class="footer-section">
-            <p class="thank-you">Thank You!</p>
-            <p class="footer-text">For inquiries, contact the CICT Student Council Office</p>
-            <p class="footer-text">This is an official receipt for your order</p>
-            <p class="timestamp">{{ now()->format('Y-m-d H:i:s') }}</p>
+            <div class="panel" style="padding:0; border:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-center" style="width:80px;">Qty</th>
+                            <th class="text-right" style="width:120px;">Unit</th>
+                            <th class="text-right" style="width:120px;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($order->items as $item)
+                            <tr>
+                                <td>
+                                    <div class="value" style="font-size:13px;">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</div>
+                                    @if($item->variant || $item->variant_name)
+                                        <div class="muted">Variant: {{ optional($item->variant)->name ?? $item->variant_name }}</div>
+                                    @endif
+                                </td>
+                                <td class="text-center">{{ $item->quantity }}</td>
+                                <td class="text-right">₱{{ number_format($item->unit_price, 2) }}</td>
+                                <td class="text-right">₱{{ number_format($item->unit_price * $item->quantity, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="totals">
+                <div class="total-row"><span class="muted">Subtotal</span><strong>₱{{ number_format($order->items->sum('total_price'), 2) }}</strong></div>
+                @if($order->discount > 0)
+                    <div class="total-row"><span class="muted">Discount</span><strong>-₱{{ number_format($order->discount, 2) }}</strong></div>
+                @endif
+                <div class="total-row grand"><span class="muted">Total due</span><strong>₱{{ number_format($order->total, 2) }}</strong></div>
+            </div>
+
+            <div class="barcode">Receipt timestamp {{ now()->format('M d, Y \a\t g:i A') }}</div>
+            <div class="footer">Please present this receipt when claiming items. For questions, visit the CICT Student Council Office.</div>
         </div>
     </div>
 
     <script>
-        function printReceipt() {
-            window.print();
-        }
+        async function generatePDF(event) {
+            const btn = event?.target;
+            if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
 
-        async function generatePDF() {
-            const receiptElement = document.getElementById('receipt-content');
-            const orderId = '{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}';
-            
             try {
-                const btn = event.target;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '⏳ Generating...';
-                btn.disabled = true;
+                const receiptElement = document.getElementById('receipt-content');
+                const orderId = '{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}';
 
-                const canvas = await html2canvas(receiptElement, {
-                    scale: 3,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff'
-                });
-
+                const canvas = await html2canvas(receiptElement, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 const { jsPDF } = window.jspdf;
                 const imgData = canvas.toDataURL('image/png');
-                
-                const imgWidth = 210;
-                const pageHeight = 297;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                
-                let heightLeft = imgHeight;
-                let position = 0;
-                
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-                
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
 
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = pageWidth;
+                const imgHeight = canvas.height * (imgWidth / canvas.width);
+                const yOffset = Math.max((pageHeight - imgHeight) / 2, 10);
+
+                pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidth, imgHeight);
                 pdf.save(`receipt-${orderId}.pdf`);
-
-                btn.innerHTML = originalText;
-                btn.disabled = false;
             } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF. Please try printing instead.');
-                const btn = event.target;
-                btn.innerHTML = '📥 Download';
-                btn.disabled = false;
+                console.error('PDF generation failed', error);
+                alert('Could not generate PDF. Please try again.');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Download PDF'; }
             }
         }
     </script>

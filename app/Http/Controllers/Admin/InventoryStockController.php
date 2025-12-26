@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\InventoryHistory;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -51,6 +52,18 @@ class InventoryStockController extends Controller
                 'reference' => $request->reference,
                 'notes' => $request->notes,
             ]);
+
+            AuditLog::logAction(
+                'stock_in',
+                'ProductVariant',
+                $variant->id,
+                ['stock_quantity' => $oldStock],
+                [
+                    'stock_quantity' => $oldStock + $request->quantity,
+                    'reference' => $request->reference,
+                    'notes' => $request->notes,
+                ]
+            );
 
             DB::commit();
 
@@ -112,6 +125,18 @@ class InventoryStockController extends Controller
                 'reference' => $request->reason,
                 'notes' => $request->notes,
             ]);
+
+            AuditLog::logAction(
+                'stock_out',
+                'ProductVariant',
+                $variant->id,
+                ['stock_quantity' => $oldStock],
+                [
+                    'stock_quantity' => $oldStock - $request->quantity,
+                    'reason' => $request->reason,
+                    'notes' => $request->notes,
+                ]
+            );
 
             DB::commit();
 

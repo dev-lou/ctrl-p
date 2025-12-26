@@ -5,7 +5,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
 
         body {
-            background: #FFFAF1 !important;
+            background: #F8FAFC !important;
             font-family: 'Inter', sans-serif;
         }
 
@@ -130,8 +130,8 @@
         }
 
         .shop-hero {
-            background: linear-gradient(135deg, #FFFAF1 0%, #FFFFFF 100%);
-            border-bottom: 2px solid #F0F0F0;
+            background: #F7F8FB;
+            border-bottom: 2px solid #E5E7EB;
         }
 
         .shop-hero h1 {
@@ -160,7 +160,7 @@
         }
 
         .shop-content {
-            background: #FFFAF1;
+            background: #F7F8FB;
         }
 
         .products-header {
@@ -309,18 +309,18 @@
     </style>
 
     <!-- Hero Section -->
-    <div style="background: linear-gradient(135deg, rgba(139, 0, 0, 0.9) 0%, rgba(160, 0, 0, 0.9) 100%), url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=500&fit=crop') center/cover; min-height: 550px; display: flex; align-items: center; justify-content: center; position: relative;">
+    <div style="background: linear-gradient(135deg, rgba(139, 0, 0, 0.88) 0%, rgba(160, 0, 0, 0.86) 100%), url('https://img.freepik.com/free-photo/empty-shopping-trolley-left-outside_53876-31323.jpg?semt=ais_hybrid&w=740&q=80') center/cover; min-height: 86vh; display: flex; align-items: center; justify-content: center; position: relative; border-radius: 0 0 32px 32px; box-shadow: inset 0 -90px 160px rgba(0,0,0,0.18); margin-top: -70px; padding-top: 200px; padding-bottom: 150px;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style="text-align: center; color: white; z-index: 10;">
             <div class="max-w-4xl mx-auto text-center">
-                <p style="font-size: 22px; color: rgba(255, 255, 255, 0.98); text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5); letter-spacing: 0.5px; margin-bottom: 12px;">📦 CICT Student Council Store</p>
-                <h1 style="font-size: 62px; font-weight: 900; color: #FFFFFF; text-shadow: 0 4px 16px rgba(0, 0, 0, 0.6); letter-spacing: -2px; margin-bottom: 16px; line-height: 1.2;">Premium Merchandise</h1>
-                <p style="font-size: 19px; color: rgba(255, 255, 255, 0.98); max-width: 750px; margin: 0 auto; text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5); line-height: 1.6;">Discover exclusive, high-quality merchandise from ISUFST Dingle Campus CICT Student Council. Every purchase supports student initiatives and campus activities.</p>
+                <p style="font-size: 20px; color: rgba(255, 255, 255, 0.92); text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5); letter-spacing: 0.6px; margin-bottom: 10px;">📦 CICT Student Council Store</p>
+                <h1 style="font-size: 58px; font-weight: 900; color: #FFFFFF; text-shadow: 0 4px 16px rgba(0, 0, 0, 0.6); letter-spacing: -1.6px; margin-bottom: 14px; line-height: 1.15;">Premium Merchandise</h1>
+                <p style="font-size: 19px; color: rgba(255, 255, 255, 0.94); max-width: 760px; margin: 0 auto; text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5); line-height: 1.65;">Exclusive, high-quality campus merch   from shirts to keepsakes. Every purchase powers student initiatives and events.</p>
             </div>
         </div>
     </div>
 
     <!-- Products Section Wrapper -->
-    <div style="background: #FFFFFF; min-height: auto; width: 100%; padding-top: 0;">
+    <div style="background: #F7F8FB; min-height: auto; width: 100%; padding-top: 0;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 shop-content">
         @if($products->count() > 0)
             <div class="products-header" style="margin-top: 0px;">
@@ -332,8 +332,12 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 @foreach($products as $product)
-                    <div class="product-card reveal-on-scroll" data-reveal-delay="{{ ($loop->index % 4) * 100 }}">
-                        <div class="product-badge">Campus</div>
+                    @php
+                        $stock = $product->current_stock;
+                        $stockLabel = isset($stock) ? ($stock > 0 ? $stock . ' in stock' : 'Out of stock') : 'Stock info unavailable';
+                    @endphp
+                    <a href="{{ route('shop.show', $product->slug) }}" class="product-card reveal-on-scroll" data-reveal-delay="{{ ($loop->index % 4) * 100 }}" style="text-decoration: none;">
+                        <div class="product-badge">{{ $stockLabel }}</div>
                         
                         <!-- Stock Indicator Badge -->
                         @if($product->current_stock > 0 && $product->current_stock <= $product->low_stock_threshold)
@@ -366,9 +370,9 @@
                             <div class="product-price">
                                 <span>₱{{ number_format($product->base_price, 2) }}</span>
                             </div>
-                            <a href="{{ route('shop.show', $product->slug) }}" class="btn-view-details">View Details</a>
+                            <span class="btn-view-details">View Details</span>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
             </div>
 

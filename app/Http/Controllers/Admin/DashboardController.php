@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderItem;
+use App\Models\Service;
+use App\Models\ServiceOption;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -128,6 +130,13 @@ class DashboardController extends Controller
             ->distinct('user_id')
             ->count('user_id');
 
+        // ========================================================================
+        // SERVICES ANALYTICS
+        // ========================================================================
+        $servicesTotal = Service::query()->count();
+        $servicesActive = Service::query()->where('is_active', true)->count();
+        $serviceOptionsCount = ServiceOption::query()->count();
+
         return view('admin.dashboard', [
             // Metrics
             'todaysSales' => $todaysSales,
@@ -154,6 +163,11 @@ class DashboardController extends Controller
             // Customer Insights
             'newCustomersThisMonth' => $newCustomersThisMonth,
             'activeCustomers' => $activeCustomers,
+
+            // Services
+            'servicesTotal' => $servicesTotal,
+            'servicesActive' => $servicesActive,
+            'serviceOptionsCount' => $serviceOptionsCount,
         ]);
     }
 }

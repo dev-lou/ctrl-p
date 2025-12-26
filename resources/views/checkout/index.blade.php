@@ -1,10 +1,10 @@
 <x-app-layout :title="'Checkout - CICT Merch'">
-    <div style="background: #FFFAF1; min-height: 100vh; width: 100%; padding-top: 80px;">
+    <div style="background: #F5F7FB; min-height: 100vh; width: 100%; padding-top: 80px;">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
 
         body {
-            background: #FFFAF1 !important;
+            background: #FFFFFF !important;
             font-family: 'Inter', sans-serif;
         }
 
@@ -59,15 +59,15 @@
         /* Checkout Cards */
         .checkout-card {
             background: #FFFFFF;
-            border: 2px solid #F0F0F0;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E7EAF0;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .checkout-card:hover {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border-color: #8B0000;
+            box-shadow: 0 16px 46px rgba(15, 23, 42, 0.12);
+            border-color: #d8dde8;
         }
 
         .checkout-card h2 {
@@ -242,9 +242,9 @@
         /* Order Summary Card */
         .order-summary-card {
             background: #FFFFFF;
-            border: 2px solid #F0F0F0;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #E7EAF0;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
         }
 
         .order-summary-card h2 {
@@ -361,6 +361,39 @@
             font-weight: 700;
         }
 
+        .checkout-shell {
+            background: #FFFFFF;
+            border: 1px solid #E7EAF0;
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.08);
+            padding: 32px;
+        }
+
+        .checkout-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 18px 0 10px;
+        }
+
+        .checkout-step {
+            background: #FFFFFF;
+            border: 1px solid #E7EAF0;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: #1a1a1a;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+        }
+
+        .checkout-step.active {
+            border-color: #8B0000;
+            box-shadow: 0 10px 26px rgba(139, 0, 0, 0.15);
+            color: #8B0000;
+        }
+
         @media (max-width: 768px) {
             .order-item-image {
                 width: 80px;
@@ -380,7 +413,7 @@
         }
     </style>
 
-    <div style="background: #FFFAF1; min-height: 100vh; width: 100%;">
+    <div style="background: transparent; min-height: 100vh; width: 100%;">
         <div class="py-4 mt-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
@@ -393,8 +426,15 @@
                     <div class="checkout-header-badge">
                         Complete your order securely
                     </div>
+
+                    <div class="checkout-steps">
+                        <div class="checkout-step">Cart</div>
+                        <div class="checkout-step active">Checkout</div>
+                        <div class="checkout-step">Confirmation</div>
+                    </div>
                 </div>
 
+                <div class="checkout-shell">
                 <form method="POST" action="{{ route('checkout.store') }}">
                     @csrf
                     {{-- Fallback: post the cart JSON with the form in case server session is lost between requests --}}
@@ -474,6 +514,7 @@
                         </div>
                     </div>
                 </form>
+                </div>
         </div>
     </div>
     </div>

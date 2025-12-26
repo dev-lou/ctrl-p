@@ -13,12 +13,12 @@
         <div style="position: absolute; top: 20px; left: 10%; width: 150px; height: 150px; background: rgba(255,255,255,0.04); border-radius: 50%;"></div>
     </div>
 
-    <div style="background: #FFFAF1; min-height: 100vh; width: 100%; position: relative; z-index: 1;">
+    <div style="background: #FFFFFF; min-height: 100vh; width: 100%; position: relative; z-index: 1;">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
 
         body {
-            background: #FFFAF1 !important;
+            background: #FFFFFF !important;
             font-family: 'Inter', sans-serif;
         }
 
@@ -684,12 +684,12 @@
 
                         @if($product->current_stock > 0)
                             @auth
-                                <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+                                <button type="submit" class="add-to-cart-btn" id="add_to_cart_btn">Add to Cart</button>
                             @else
-                                <a href="{{ route('login') }}" class="add-to-cart-btn">Sign In to Purchase</a>
+                                <a href="{{ route('login') }}" class="add-to-cart-btn" id="add_to_cart_btn">Sign In to Purchase</a>
                             @endauth
                         @else
-                            <div style="background: #F8D7DA; border: 1px solid #F5C6CB; color: #721C24; padding: 16px; border-radius: 10px; text-align: center; font-weight: 600;">
+                            <div id="out_of_stock_msg" style="background: #F8D7DA; border: 1px solid #F5C6CB; color: #721C24; padding: 16px; border-radius: 10px; text-align: center; font-weight: 600;">
                                 Out of Stock
                             </div>
                         @endif
@@ -751,15 +751,32 @@
     <!-- SweetAlert2 for small centered 'Added to cart' feedback -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        const qtyInput = document.getElementById('quantity_input');
+        const maxQtyEl = document.getElementById('max_qty');
+        const addBtn = document.getElementById('add_to_cart_btn');
+        const outOfStockMsg = document.getElementById('out_of_stock_msg');
+
+        function setStockState(stock) {
+            const qtyBtns = document.querySelectorAll('.quantity-btn');
+            const hasStock = stock > 0;
+            maxQtyEl.textContent = stock;
+            qtyInput.value = hasStock ? 1 : 0;
+
+            qtyBtns.forEach(btn => btn.disabled = !hasStock);
+            if (addBtn) {
+                addBtn.style.display = hasStock ? 'block' : 'none';
+                if ('disabled' in addBtn) addBtn.disabled = !hasStock;
+            }
+            if (outOfStockMsg) outOfStockMsg.style.display = hasStock ? 'none' : 'block';
+        }
+
         function decreaseQty() {
-            const input = document.getElementById('quantity_input');
-            if (input.value > 1) input.value--;
+            if (parseInt(qtyInput.value) > 1) qtyInput.value--;
         }
 
         function increaseQty() {
-            const input = document.getElementById('quantity_input');
-            const maxQty = parseInt(document.getElementById('max_qty').textContent);
-            if (parseInt(input.value) < maxQty) input.value++;
+            const maxQty = parseInt(maxQtyEl.textContent) || 0;
+            if (parseInt(qtyInput.value) < maxQty) qtyInput.value++;
         }
 
         // Function to format price
@@ -771,37 +788,20 @@
         document.querySelectorAll('input[name="variant_id"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 document.getElementById('selected_variant').value = this.value;
-                
-                // Get variant data
-                const variantStock = parseInt(this.getAttribute('data-stock'));
+                const variantStock = parseInt(this.getAttribute('data-stock')) || 0;
                 const variantPrice = parseFloat(this.getAttribute('data-price'));
-                
-                // Update price with smooth animation
+
                 const priceElement = document.getElementById('display-price');
                 priceElement.style.opacity = '0.5';
                 priceElement.style.transform = 'scale(0.95)';
                 priceElement.style.transition = 'all 0.3s ease-out';
-                
                 setTimeout(() => {
                     priceElement.textContent = formatPrice(variantPrice);
                     priceElement.style.opacity = '1';
                     priceElement.style.transform = 'scale(1)';
                 }, 150);
-                
-                // Update max quantity based on selected variant's stock
-                document.getElementById('max_qty').textContent = variantStock;
-                document.getElementById('quantity_input').value = 1;
-                
-                // Update add to cart button visibility
-                const addBtn = document.querySelector('.add-to-cart-btn');
-                const outOfStockMsg = document.querySelector('[style*="F8D7DA"]');
-                if (variantStock > 0) {
-                    if (addBtn) addBtn.style.display = 'block';
-                    if (outOfStockMsg) outOfStockMsg.style.display = 'none';
-                } else {
-                    if (addBtn) addBtn.style.display = 'none';
-                    if (outOfStockMsg) outOfStockMsg.style.display = 'block';
-                }
+
+                setStockState(variantStock);
             });
         });
 
@@ -811,6 +811,20 @@
             if (!cartForm) return;
 
             cartForm.addEventListener('submit', function (e) {
+                const available = parseInt(maxQtyEl.textContent) || 0;
+                if (available <= 0) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Sold out',
+                        text: 'This item is currently unavailable.',
+                        showConfirmButton: false,
+                        timer: 1200,
+                        position: 'center',
+                        width: 300
+                    });
+                    return;
+                }
                 // Prevent navigating away immediately so user sees the feedback
                 e.preventDefault();
 
@@ -827,6 +841,10 @@
                 // Submit after the timer so the alert is visible briefly
                 setTimeout(() => cartForm.submit(), 900);
             });
+
+            // Initialize stock UI on load
+            const initialStock = parseInt(maxQtyEl.textContent) || 0;
+            setStockState(initialStock);
         });
     </script>
 

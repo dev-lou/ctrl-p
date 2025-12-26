@@ -6,7 +6,7 @@
             --primary-blue-light: #A00000;
             --primary-text: #1F1F1F;
             --secondary-text: #555555;
-            --light-bg: #FFFAF1;
+            --light-bg: #F7F8FB;
             --white: #FFFFFF;
             --border-light: #E8DCC8;
             --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -19,20 +19,24 @@
         .contact-page-wrapper {
             background: var(--light-bg);
             min-height: calc(100vh - 200px);
-            padding-top: 120px;
+            padding-top: 0;
             padding-bottom: 80px;
         }
 
         /* ============ HERO SECTION ============ */
         .contact-hero {
-            background: linear-gradient(135deg, rgba(139, 0, 0, 0.9) 0%, rgba(160, 0, 0, 0.9) 100%), url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=400&fit=crop') center/cover;
-            min-height: 550px;
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.88) 0%, rgba(160, 0, 0, 0.86) 100%), url('https://scontent.fceb2-1.fna.fbcdn.net/v/t39.30808-6/501576305_727677589775056_8912524276218180968_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeHh06uhhf6hRD_H2CS3SIv0PWjGq8SGvdU9aMarxIa91RTOrQs-N_xEnHvyDtraGVh0Acledt3XmnGCJPeILquM&_nc_ohc=dOxifiaXOuwQ7kNvwFmdrkx&_nc_oc=AdlF4jIulBd47oBNbLMFlWXpsa3bsQWD5tSu-KQVMECsiQjxvZxVmiJxVZtKEQbJ6VZ-HuqwivfpDM5lCk103lX3&_nc_zt=23&_nc_ht=scontent.fceb2-1.fna&_nc_gid=VCECYsbHMZtX3naN8a1mow&oh=00_Afntvs-VFKgrDC7KbzOfpRfEF-nMY_bZLRkGk9_Q7ympnA&oe=69543527') center/cover;
+            min-height: 86vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             position: relative;
-            margin-top: -120px;
+            margin-top: -70px;
+            padding-top: 200px;
+            padding-bottom: 150px;
+            border-radius: 0 0 32px 32px;
+            box-shadow: inset 0 -90px 160px rgba(0,0,0,0.18);
         }
 
         .contact-hero-content {
@@ -72,9 +76,48 @@
             font-size: 42px;
             font-weight: 800;
             color: var(--primary-text);
-            margin-bottom: 60px;
+            margin-bottom: 18px;
             text-align: center;
             letter-spacing: -0.5px;
+        }
+
+        .section-subheading {
+            font-size: 16px;
+            color: #556;
+            text-align: center;
+            margin: 0 auto 32px;
+            max-width: 720px;
+            line-height: 1.6;
+        }
+
+        .contact-shell {
+            background: linear-gradient(135deg, #FFFFFF 0%, #FAFAF8 100%);
+            border-radius: 18px;
+            border: 1px solid rgba(139, 0, 0, 0.08);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.06);
+            padding: 32px;
+        }
+
+        .contact-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .contact-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(139, 0, 0, 0.07);
+            color: #8B0000;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.2px;
+            border: 1px solid rgba(139, 0, 0, 0.12);
         }
 
         .contact-grid {
@@ -351,58 +394,69 @@
         <section class="contact-hero">
             <div class="contact-hero-content">
                 <h1>Get in Touch</h1>
-                <p>Have questions? We'd love to hear from you. Reach out to the CICT Student Council officers.</p>
+                <p>Have questions? We'd love to hear from you. Reach out to the CICT Student Council office.</p>
             </div>
         </section>
 
         <!-- ============ CONTACT INFORMATION ============ -->
         <section class="contact-section">
             <div class="section-container">
-                <div class="contact-grid">
-                    <div class="contact-info">
-                        <div class="contact-block">
-                            <span class="contact-label">Office Hours</span>
-                            <span class="contact-value">Monday – Friday: 8:00 AM – 5:00 PM<br><small style="color: #666; font-size: 13px; font-weight: 500;">Closed on Saturday and Sunday</small></span>
+                <h2 class="section-heading">Contact CICT Student Council</h2>
+                <p class="section-subheading">Your official line to updates, merch inquiries, and student services support.</p>
+
+                <div class="contact-meta">
+                    <span>⏱️ Response in 1-2 business days</span>
+                    <span>📍 ISUFST Dingle Campus</span>
+                    <span>💬 Facebook / Messenger</span>
+                </div>
+
+                <div class="contact-shell">
+                    <div class="contact-grid">
+                        <div class="contact-info">
+                            <div class="contact-block">
+                                <span class="contact-label">Office Hours</span>
+                                <span class="contact-value">Monday – Friday: 8:00 AM – 5:00 PM<br><small style="color: #666; font-size: 13px; font-weight: 500;">Closed on Saturday and Sunday</small></span>
+                            </div>
+
+                            <a href="https://www.facebook.com/profile.php?id=100068849010766" target="_blank" class="social-card">
+                                <div class="social-card-icon">📘</div>
+                                <div class="social-card-content">
+                                    <div class="social-card-title">Facebook</div>
+                                    <div class="social-card-description">Follow our official page</div>
+                                </div>
+                                <div class="social-card-arrow">→</div>
+                            </a>
+
+                            <a href="https://www.messenger.com/e2ee/t/780806171591045" target="_blank" class="social-card">
+                                <div class="social-card-icon">💬</div>
+                                <div class="social-card-content">
+                                    <div class="social-card-title">Messenger</div>
+                                    <div class="social-card-description">Contact us for business inquiries</div>
+                                </div>
+                                <div class="social-card-arrow">→</div>
+                            </a>
+
+                            <div class="location-card">
+                                <div class="location-icon">📍</div>
+                                <div class="location-content">
+                                    <div class="location-title">Our Location</div>
+                                    <div class="location-address">CICT Student Council Office<br>ISUFST Dingle Campus<br>Brgy. San Matias, Dingle<br>Iloilo, Philippines</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <a href="https://www.facebook.com/profile.php?id=100068849010766" target="_blank" class="social-card">
-                            <div class="social-card-icon">📘</div>
-                            <div class="social-card-content">
-                                <div class="social-card-title">Facebook</div>
-                                <div class="social-card-description">Follow our official page</div>
-                            </div>
-                            <div class="social-card-arrow">→</div>
-                        </a>
-
-                        <a href="https://www.messenger.com/e2ee/t/780806171591045" target="_blank" class="social-card">
-                            <div class="social-card-icon">💬</div>
-                            <div class="social-card-content">
-                                <div class="social-card-title">Messenger</div>
-                                <div class="social-card-description">Contact us for business inquiries</div>
-                            </div>
-                            <div class="social-card-arrow">→</div>
-                        </a>
-
-                        <div class="location-card">
-                            <div class="location-icon">📍</div>
-                            <div class="location-content">
-                                <div class="location-title">Our Location</div>
-                                <div class="location-address">CICT Student Council Office<br>ISUFST Dingle Campus<br>Brgy. San Matias, Dingle<br>Iloilo, Philippines</div>
-                            </div>
+                        <div class="map-container" role="region" aria-label="CICT Student Council Office location">
+                            <!-- Embedded Google Map (iframe) -->
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1019.5295668491787!2d122.6630695470763!3d11.001138999855694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33af1776ffd9b7f1%3A0x2c4663ccaaf49fa8!2sIloilo%20State%20University%20of%20Fisheries%20Science%20and%20Technology%E2%80%93%20Dingle%20Campus!5e1!3m2!1sen!2sph!4v1764327935192!5m2!1sen!2sph"
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                allowfullscreen
+                                style="border:0; width:100%; height:100%; display:block;"
+                                aria-hidden="false"
+                                title="CICT Student Council Office - Google Maps"
+                            ></iframe>
                         </div>
-                    </div>
-
-                    <div class="map-container" role="region" aria-label="CICT Student Council Office location">
-                        <!-- Embedded Google Map (iframe) -->
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1019.5295668491787!2d122.6630695470763!3d11.001138999855694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33af1776ffd9b7f1%3A0x2c4663ccaaf49fa8!2sIloilo%20State%20University%20of%20Fisheries%20Science%20and%20Technology%E2%80%93%20Dingle%20Campus!5e1!3m2!1sen!2sph!4v1764327935192!5m2!1sen!2sph"
-                            loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade"
-                            allowfullscreen
-                            style="border:0; width:100%; height:100%; display:block;"
-                            aria-hidden="false"
-                            title="CICT Student Council Office - Google Maps"
-                        ></iframe>
                     </div>
                 </div>
             </div>

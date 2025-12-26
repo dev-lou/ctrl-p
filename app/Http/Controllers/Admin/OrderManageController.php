@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -211,6 +212,19 @@ class OrderManageController extends Controller
     public function destroy(Order $order): \Illuminate\Http\RedirectResponse
     {
         $orderNumber = $order->order_number;
+
+        AuditLog::logAction(
+            'order_delete',
+            'Order',
+            $order->id,
+            [
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'total' => $order->total,
+            ],
+            null
+        );
+
         $order->delete();
 
         return redirect()->back()
@@ -242,6 +256,14 @@ class OrderManageController extends Controller
             $order->update(['completed_at' => now()]);
         }
 
+        AuditLog::logAction(
+            'order_status',
+            'Order',
+            $order->id,
+            ['status' => $oldStatus],
+            ['status' => $newStatus]
+        );
+
         return redirect()->route('admin.orders.show', $order)
             ->with('success', "Order status updated from {$oldStatus} to {$newStatus}.");
     }
@@ -260,6 +282,7 @@ class OrderManageController extends Controller
             'assigned_staff_id' => 'nullable|exists:users,id',
         ]);
 
+        $oldStaffId = $order->assigned_staff_id;
         $staffName = 'Unassigned';
         if ($request->assigned_staff_id) {
             $staff = \App\Models\User::find($request->assigned_staff_id);
@@ -268,6 +291,14 @@ class OrderManageController extends Controller
 
         // Update order assigned staff
         $order->update(['assigned_staff_id' => $request->assigned_staff_id]);
+
+        AuditLog::logAction(
+            'order_assign',
+            'Order',
+            $order->id,
+            ['assigned_staff_id' => $oldStaffId],
+            ['assigned_staff_id' => $request->assigned_staff_id]
+        );
 
         return redirect()->route('admin.orders.show', $order)
             ->with('success', "Order assigned to {$staffName}.");

@@ -1,563 +1,169 @@
-<x-app-layout>
-    <div style="background: #FFFAF1; min-height: 100vh; width: 100%; padding-top: 100px;">
+<x-app-layout :title="'Receipt - Ctrl+P'">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
-
-        body {
-            background: #FFFAF1 !important;
-            font-family: 'Inter', sans-serif;
+        :root {
+            --ink: #0f172a;
+            --muted: #475569;
+            --border: rgba(15,23,42,0.08);
+            --accent: #8B0000;
+            --surface: #ffffff;
+            --bg: #f8fafc;
         }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Poppins', sans-serif;
-        }
+        body { background: var(--bg) !important; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
 
-        .animated-gradient-receipt {
-            background: #FFFAF1;
-            min-height: 100vh;
-        }
+        .page { max-width: 900px; margin: 0 auto; padding: 110px 20px 80px; }
+        .actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-bottom:14px; }
+        .btn { padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:#fff; font-weight:700; cursor:pointer; text-decoration:none; color:var(--ink); }
+        .btn.primary { background: linear-gradient(135deg, var(--accent), #A00000); color:#fff; border:none; box-shadow:0 12px 36px rgba(139,0,0,0.15); }
+        .btn.secondary { color: var(--accent); border-color: var(--accent); }
+        .btn:disabled { opacity:0.7; cursor:not-allowed; }
 
-        #receipt-content {
-            background: white;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            page-break-inside: avoid;
-        }
+        .paper { background: var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:0 20px 60px rgba(15,23,42,0.08); padding:28px; }
+        .header { display:flex; justify-content:space-between; gap:16px; border-bottom:2px solid var(--border); padding-bottom:14px; margin-bottom:14px; }
+        .brand { font-weight:900; font-size:22px; color:var(--accent); letter-spacing:-0.3px; }
+        .tagline { color:var(--muted); font-size:12px; margin-top:4px; }
+        .title { text-align:center; margin:10px 0 4px 0; font-size:22px; font-weight:900; color:var(--ink); }
+        .subline { text-align:center; color:var(--muted); font-weight:700; font-size:13px; margin:0 0 18px 0; }
 
-        .receipt-header {
-            border-bottom: 3px solid #8B0000;
-            padding-bottom: 16px;
-            margin-bottom: 18px;
-        }
+        .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin-bottom:18px; }
+        .panel { border:1px solid var(--border); border-radius:12px; padding:12px; }
+        .label { text-transform: uppercase; letter-spacing:0.14em; font-size:11px; font-weight:800; color:var(--muted); margin-bottom:6px; }
+        .value { font-weight:800; color:var(--ink); font-size:15px; }
+        .value.small { font-weight:700; color:var(--muted); font-size:13px; }
 
-        .company-name {
-            color: #8B0000;
-            font-size: 24px;
-            font-weight: 800;
-            margin: 0;
-        }
+        table { width:100%; border-collapse:collapse; margin-top:4px; }
+        thead th { text-align:left; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); padding:10px 8px; border-bottom:1px solid var(--border); }
+        tbody td { padding:10px 8px; font-size:13px; color:var(--ink); border-bottom:1px solid var(--border); }
+        .text-right { text-align:right; }
+        .text-center { text-align:center; }
+        .muted { color:var(--muted); font-weight:600; font-size:12px; }
 
-        .company-tagline {
-            color: #666666;
-            font-size: 12px;
-            font-weight: 500;
-            margin: 2px 0 0 0;
-        }
+        .totals { margin-top:14px; border-top:1px solid var(--border); padding-top:10px; }
+        .total-row { display:flex; justify-content:flex-end; gap:16px; padding:6px 0; font-weight:700; color:var(--muted); }
+        .total-row strong { color:var(--ink); min-width:140px; text-align:right; }
+        .grand { font-size:18px; color:var(--accent); }
 
-        .section-title {
-            color: #1a1a1a;
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin: 12px 0 8px 0;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 12px;
-        }
-
-        .detail-label {
-            color: #666666;
-            font-weight: 600;
-        }
-
-        .detail-value {
-            color: #1a1a1a;
-            font-weight: 700;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 12px 0;
-            font-size: 12px;
-        }
-
-        thead {
-            background: #F9F9F9;
-            border-top: 2px solid #E8E8E8;
-            border-bottom: 2px solid #E8E8E8;
-        }
-
-        th {
-            padding: 8px;
-            text-align: left;
-            font-weight: 800;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #1a1a1a;
-        }
-
-        td {
-            padding: 8px;
-            font-size: 12px;
-            color: #1a1a1a;
-            border-bottom: 1px solid #E8E8E8;
-        }
-
-        tbody tr:hover {
-            background: #F9F9F9;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .totals-section {
-            margin: 12px 0;
-            padding: 12px 0;
-            border-top: 2px solid #E8E8E8;
-            border-bottom: 2px solid #E8E8E8;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: flex-end;
-            gap: 30px;
-            padding: 6px 0;
-            font-size: 12px;
-        }
-
-        .total-row.final {
-            border-top: 1px solid #E8E8E8;
-            padding-top: 8px;
-            margin-top: 8px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .total-label {
-            color: #666666;
-            font-weight: 600;
-            min-width: 120px;
-            text-align: right;
-        }
-
-        .total-value {
-            color: #1a1a1a;
-            font-weight: 700;
-            min-width: 100px;
-            text-align: right;
-        }
-
-        .total-value.final {
-            color: #8B0000;
-            font-weight: 800;
-            font-size: 20px;
-        }
-
-        .footer-section {
-            text-align: center;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 2px solid #E8E8E8;
-        }
-
-        .thank-you {
-            color: #1a1a1a;
-            font-size: 14px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .footer-text {
-            color: #666666;
-            font-size: 11px;
-            margin-bottom: 8px;
-        }
-
-        .qr-placeholder {
-            width: 100%;
-            margin: 12px 0;
-            padding: 12px;
-            background: #F9F9F9;
-            border: 2px solid #E8E8E8;
-            border-radius: 4px;
-            text-align: center;
-            display: block;
-        }
-
-        .barcode-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .barcode {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 2px;
-            height: 60px;
-            background: white;
-            padding: 8px;
-            border: 1px solid #ddd;
-            width: 100%;
-            min-height: 60px;
-        }
-
-        .barcode-bar {
-            background: #000000;
-            width: 4px;
-            border-radius: 1px;
-            flex: 1;
-            min-width: 2px;
-        }
-
-        .timestamp {
-            color: #999999;
-            font-size: 12px;
-            margin-top: 16px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-            margin-bottom: 24px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #8B0000 0%, #A00000 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(139, 0, 0, 0.25);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #A00000 0%, #B00000 100%);
-            box-shadow: 0 8px 20px rgba(139, 0, 0, 0.35);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #8B0000;
-            border: 2px solid #8B0000;
-        }
-
-        .btn-secondary:hover {
-            background: #8B0000;
-            color: white;
-            transform: translateY(-2px);
-        }
+        .barcode { margin-top:16px; padding:12px; border:1px dashed var(--border); border-radius:10px; text-align:center; color:var(--muted); font-weight:700; }
+        .footer { margin-top:16px; border-top:1px solid var(--border); padding-top:10px; color:var(--muted); font-weight:600; font-size:12px; text-align:center; }
 
         @media print {
-            body {
-                background: white;
-                padding: 0;
-                margin: 0;
-            }
-
-            .action-buttons {
-                display: none !important;
-                visibility: hidden !important;
-            }
-
-            #receipt-content {
-                box-shadow: none;
-                border-radius: 0;
-                padding: 16px;
-                margin: 0;
-                max-width: 100%;
-                page-break-inside: avoid;
-                page-break-before: avoid;
-                page-break-after: avoid;
-            }
-
-            .barcode {
-                background: white !important;
-                border: 1px solid #000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                color-adjust: exact;
-            }
-
-            .barcode-bar {
-                background: #000000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                color-adjust: exact;
-            }
-
-            .qr-placeholder {
-                background: white !important;
-                border: 1px solid #000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                color-adjust: exact;
-            }
-
-            * {
-                page-break-inside: avoid;
-            }
-        }
-
-        @media print and (max-height: 842px) {
-            body { font-size: 11px; }
-            #receipt-content { padding: 12px; }
-            .section-title { margin: 8px 0 6px 0; }
-            th, td { padding: 6px; font-size: 10px; }
-        }
-
-        @media print and (max-height: 1191px) {
-            body { font-size: 12px; }
-            #receipt-content { padding: 20px; }
-        }
-
-        @media (max-width: 640px) {
-            #receipt-content {
-                padding: 24px;
-            }
-
-            .company-name {
-                font-size: 24px;
-            }
-
-            th, td {
-                padding: 10px 8px;
-                font-size: 13px;
-            }
+            body { background:#fff; padding:0; }
+            .actions { display:none !important; }
+            .page { padding:0; margin:0; }
+            .paper { box-shadow:none; border:1px solid #d1d5db; border-radius:0; }
         }
     </style>
-    
-    <div class="animated-gradient-receipt py-16 mt-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Action Buttons - Top -->
-            <div class="action-buttons mb-8">
-                <a href="{{ route('account.orders') }}" class="btn btn-secondary">← Back to Orders</a>
-                <button onclick="printReceipt()" class="btn btn-primary">🖨️ Print</button>
-                <button onclick="generatePDF()" class="btn btn-primary">📥 Download PDF</button>
-            </div>
 
-            <div id="receipt-content">
-                <!-- Receipt Header -->
-                <div class="receipt-header">
-                    <p class="company-name">🏪 {{ config('app.name', 'IGP Hub') }}</p>
-                    <p class="company-tagline">Student Council Inventory & Services</p>
-                </div>
-
-                <!-- Receipt Title -->
-                <div style="text-align: center; margin-bottom: 32px;">
-                    <h1 style="color: #1a1a1a; font-size: 24px; font-weight: 800; margin: 0 0 4px 0;">Order Receipt</h1>
-                    <p style="color: #666666; font-size: 14px; margin: 0;">Order #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</p>
-                </div>
-
-                <!-- Customer Information -->
-                <div class="detail-row">
-                    <div>
-                        <div class="section-title">Bill To</div>
-                        <div style="color: #1a1a1a; font-weight: 700; font-size: 15px; margin-bottom: 4px;">
-                            {{ $order->customer ? $order->customer->name : auth()->user()->name }}
-                        </div>
-                        <div style="color: #666666; font-size: 14px;">
-                            {{ $order->customer ? $order->customer->email : auth()->user()->email }}
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="section-title">Order Details</div>
-                        <div class="detail-row" style="justify-content: flex-end; padding: 4px 0;">
-                            <span class="detail-label" style="margin-right: 40px;">Date:</span>
-                            <span class="detail-value">{{ $order->created_at->format('M d, Y') }}</span>
-                        </div>
-                        <div class="detail-row" style="justify-content: flex-end; padding: 4px 0;">
-                            <span class="detail-label" style="margin-right: 40px;">Status:</span>
-                            <span class="detail-value">{{ ucfirst($order->status) }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Items Table -->
-                <div style="margin-top: 32px;">
-                    <h3 class="section-title">Order Items</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th class="text-center" style="width: 80px;">Qty</th>
-                                <th class="text-right" style="width: 120px;">Unit Price</th>
-                                <th class="text-right" style="width: 120px;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($order->items as $item)
-                                <tr>
-                                    <td>
-                                        <div style="font-weight: 700; margin-bottom: 4px;">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</div>
-                                        @if($item->variant || $item->variant_name)
-                                            <div style="color: #666666; font-size: 13px;">🎨 {{ optional($item->variant)->name ?? $item->variant_name }}</div>
-                                        @endif
-                                    </td>
-                                    <td class="text-center" style="font-weight: 700;">{{ $item->quantity }}</td>
-                                    <td class="text-right" style="font-weight: 700;">₱{{ number_format($item->unit_price, 2) }}</td>
-                                    <td class="text-right" style="font-weight: 800; color: #8B0000;">₱{{ number_format($item->total_price, 2) }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Service Requests (if any) -->
-                @if(method_exists($order, 'serviceRequests') && $order->serviceRequests && $order->serviceRequests->count() > 0)
-                    <div style="margin: 24px 0; padding: 16px; background: #F9F9F9; border-left: 4px solid #8B0000; border-radius: 4px;">
-                        <h3 class="section-title" style="margin-top: 0;">🔧 Printing & Customization Services</h3>
-                        @foreach($order->serviceRequests as $service)
-                            <div style="margin-bottom: 12px;">
-                                <div style="color: #1a1a1a; font-weight: 700; font-size: 14px;">
-                                    {{ ucfirst(str_replace('_', ' ', $service->service_type ?? 'Service')) }}
-                                </div>
-                                <div style="color: #666666; font-size: 13px;">{{ $service->specifications ?? 'Custom Service' }}</div>
-                                @if($service->is_rush)
-                                    <div style="color: #FF5252; font-weight: 700; font-size: 12px; margin-top: 4px;">⚡ Rush Service</div>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-
-                <!-- Totals Section -->
-                <div class="totals-section">
-                    <div class="total-row">
-                        <span class="total-label">Subtotal:</span>
-                        <span class="total-value">₱{{ number_format($order->items->sum('total_price'), 2) }}</span>
-                    </div>
-                    @if($order->discount > 0)
-                        <div class="total-row">
-                            <span class="total-label">Discount:</span>
-                            <span class="total-value" style="color: #4CAF50;">-₱{{ number_format($order->discount, 2) }}</span>
-                        </div>
-                    @endif
-                    <div class="total-row final">
-                        <span class="total-label">Total Amount:</span>
-                        <span class="total-value final">₱{{ number_format($order->total, 2) }}</span>
-                    </div>
-                </div>
-
-                <!-- Barcode Section -->
-                <div class="qr-placeholder">
-                    <div class="barcode-container">
-                        <div class="barcode">
-                            <div class="barcode-bar" style="height: 65%;"></div>
-                            <div class="barcode-bar" style="height: 80%;"></div>
-                            <div class="barcode-bar" style="height: 45%;"></div>
-                            <div class="barcode-bar" style="height: 75%;"></div>
-                            <div class="barcode-bar" style="height: 55%;"></div>
-                            <div class="barcode-bar" style="height: 90%;"></div>
-                            <div class="barcode-bar" style="height: 40%;"></div>
-                            <div class="barcode-bar" style="height: 85%;"></div>
-                            <div class="barcode-bar" style="height: 60%;"></div>
-                            <div class="barcode-bar" style="height: 70%;"></div>
-                            <div class="barcode-bar" style="height: 50%;"></div>
-                            <div class="barcode-bar" style="height: 88%;"></div>
-                            <div class="barcode-bar" style="height: 48%;"></div>
-                            <div class="barcode-bar" style="height: 78%;"></div>
-                            <div class="barcode-bar" style="height: 62%;"></div>
-                            <div class="barcode-bar" style="height: 82%;"></div>
-                            <div class="barcode-bar" style="height: 52%;"></div>
-                            <div class="barcode-bar" style="height: 92%;"></div>
-                            <div class="barcode-bar" style="height: 58%;"></div>
-                            <div class="barcode-bar" style="height: 76%;"></div>
-                            <div class="barcode-bar" style="height: 68%;"></div>
-                            <div class="barcode-bar" style="height: 84%;"></div>
-                            <div class="barcode-bar" style="height: 54%;"></div>
-                            <div class="barcode-bar" style="height: 86%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="footer-section">
-                    <p class="thank-you">Thank You for Your Order!</p>
-                    <p class="footer-text">For inquiries or concerns about your order, please contact the CICT Student Council Office.</p>
-                    <p class="timestamp">Receipt generated on {{ now()->format('M d, Y \a\t g:i A') }}</p>
-                </div>
-            </div>
+    <div class="page">
+        <div class="actions">
+            <a href="{{ route('account.orders') }}" class="btn secondary">Back to orders</a>
+            <button class="btn" onclick="window.print()">Print</button>
+            <button class="btn primary" id="pdf-btn" onclick="generatePDF(event)">Download PDF</button>
         </div>
-    </div>
+
+        <div class="paper" id="receipt-content">
+            <div class="header">
+                <div>
+                    <div class="brand">{{ config('app.name', 'IGP Hub') }}</div>
+                    <div class="tagline">Official receipt • CICT Student Council Office</div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="value">Order #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</div>
+                    <div class="value small">{{ $order->created_at->format('M d, Y \a\t g:i A') }}</div>
+                </div>
+            </div>
+
+            <div class="title">Payment Receipt</div>
+            <div class="subline">Status: {{ ucfirst($order->status) }}</div>
+
+            <div class="grid">
+                <div class="panel">
+                    <div class="label">Bill to</div>
+                    <div class="value">{{ $order->customer ? $order->customer->name : auth()->user()->name }}</div>
+                    <div class="value small">{{ $order->customer ? $order->customer->email : auth()->user()->email }}</div>
+                </div>
+                <div class="panel">
+                    <div class="label">Fulfillment</div>
+                    <div class="value">Pickup</div>
+                    <div class="value small">CICT Student Council Office · Mon–Fri, 8:00 AM – 5:00 PM</div>
+                </div>
+                <div class="panel">
+                    <div class="label">Reference</div>
+                    <div class="value">{{ strtoupper(substr(md5($order->id . $order->created_at), 0, 8)) }}</div>
+                    <div class="value small">Keep this for verification</div>
+                </div>
+            </div>
+
+            <div class="panel" style="padding:0; border:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-center" style="width:80px;">Qty</th>
+                            <th class="text-right" style="width:120px;">Unit</th>
+                            <th class="text-right" style="width:120px;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($order->items as $item)
+                            <tr>
+                                <td>
+                                    <div class="value" style="font-size:13px;">{{ optional($item->product)->name ?? $item->product_name ?? 'Product' }}</div>
+                                    @if($item->variant || $item->variant_name)
+                                        <div class="muted">Variant: {{ optional($item->variant)->name ?? $item->variant_name }}</div>
+                                    @endif
+                                </td>
+                                <td class="text-center">{{ $item->quantity }}</td>
+                                <td class="text-right">₱{{ number_format($item->unit_price, 2) }}</td>
+                                <td class="text-right">₱{{ number_format($item->unit_price * $item->quantity, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="totals">
+                <div class="total-row"><span class="muted">Subtotal</span><strong>₱{{ number_format($order->items->sum('total_price'), 2) }}</strong></div>
+                @if($order->discount > 0)
+                    <div class="total-row"><span class="muted">Discount</span><strong>-₱{{ number_format($order->discount, 2) }}</strong></div>
+                @endif
+                <div class="total-row grand"><span class="muted">Total due</span><strong>₱{{ number_format($order->total, 2) }}</strong></div>
+            </div>
+
+            <div class="barcode">Receipt timestamp {{ now()->format('M d, Y \a\t g:i A') }}</div>
+            <div class="footer">Please present this receipt when claiming items. For questions, visit the CICT Student Council Office.</div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        function printReceipt() {
-            window.print();
-        }
+        async function generatePDF(event) {
+            const btn = event?.target;
+            if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
 
-        async function generatePDF() {
-            const receiptElement = document.getElementById('receipt-content');
-            const orderId = '{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}';
-            
             try {
-                const btn = event.target;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '⏳ Generating...';
-                btn.disabled = true;
+                const receiptElement = document.getElementById('receipt-content');
+                const orderId = '{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}';
 
-                const canvas = await html2canvas(receiptElement, {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff'
-                });
-
+                const canvas = await html2canvas(receiptElement, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
                 const { jsPDF } = window.jspdf;
                 const imgData = canvas.toDataURL('image/png');
-                
-                const contentWidth = canvas.width;
-                const contentHeight = canvas.height;
-                const ratio = contentWidth / contentHeight;
-                
-                const pdfWidth = 210;
-                const pdfHeight = pdfWidth / ratio;
-                
-                const pdf = new jsPDF({
-                    orientation: 'p',
-                    unit: 'mm',
-                    format: [pdfWidth, pdfHeight]
-                });
-                
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = pageWidth;
+                const imgHeight = canvas.height * (imgWidth / canvas.width);
+                const yOffset = Math.max((pageHeight - imgHeight) / 2, 10);
+
+                pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidth, imgHeight);
                 pdf.save(`receipt-${orderId}.pdf`);
-
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-
-                alert('✓ Receipt downloaded successfully!');
             } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF. Please try again.');
-                const btn = event.target;
-                btn.innerHTML = '📥 Download PDF';
-                btn.disabled = false;
+                console.error('PDF generation failed', error);
+                alert('Could not generate PDF. Please try again.');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Download PDF'; }
             }
         }
     </script>

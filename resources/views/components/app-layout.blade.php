@@ -1,4 +1,4 @@
-@props(['title' => config('app.name', 'IGP Hub') . ' - Student Council Inventory & Services'])
+@props(['title' => 'Ctrl+P'])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -37,6 +37,9 @@
     
     <!-- Page Transition Styles -->
     <link rel="stylesheet" href="{{ asset('css/page-transitions.css') }}">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/ctrlp-logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/ctrlp-logo.png') }}">
 
     <style>
         @keyframes bounce-slow {
@@ -126,12 +129,56 @@
             {{ $slot }}
         </main>
 
+        @unless(request()->is('admin*'))
         <!-- Footer -->
-        <footer class="bg-gray-900 text-gray-300 py-8 border-t border-gray-800 mt-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <p class="text-center text-sm">&copy; 2025 Ctrl+P. All rights reserved.</p>
+        <footer class="bg-gray-900 text-gray-200 py-16 border-t border-gray-800 mt-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-12 items-start">
+                    <div class="col-span-1 flex items-start gap-6">
+                        <div class="flex-shrink-0" style="width:92px; height:92px; border-radius:9999px; padding:6px; background:#fff; box-shadow: 0 12px 28px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center;">
+                            <div style="width:80px; height:80px; border-radius:9999px; overflow:hidden; background:#fff;">
+                                <img src="{{ asset('images/ctrlp-logo.png') }}" alt="Ctrl+P logo" class="w-full h-full object-cover" style="display:block; border-radius:9999px;">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="space-y-1">
+                                <h3 class="font-bold text-xl text-white m-0">Ctrl+P</h3>
+                                <p class="text-sm m-0" style="color: rgba(255,255,255,0.75);">ISUFST Dingle Campus · Shop & Services</p>
+                            </div>
+                            <p class="text-sm m-0" style="color: rgba(255,255,255,0.7); line-height:1.7; max-width: 22rem;">Campus-run store and services delivering print, merch, and digital support for students and orgs.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 flex flex-col gap-6 mt-0 md:mt-0">
+                        <div class="p-4 rounded-xl flex items-start gap-3" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); align-self:flex-end; max-width:420px; width:100%;">
+                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full" style="background: linear-gradient(135deg,#8B0000,#A00000); color:white; box-shadow: 0 8px 20px rgba(0,0,0,0.18);">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.25c-2.548 0-4.93-.862-6.772-2.25a.75.75 0 0 1-.228-.834l1.115-3.34a.75.75 0 0 1 .713-.519h1.547A.75.75 0 0 0 9.125 10v-.25A3.625 3.625 0 0 1 12.75 6.125h1.25A3.625 3.625 0 0 1 17.625 9.75v.25a.75.75 0 0 0 .75.75h1.547a.75.75 0 0 1 .713.519l1.115 3.34a.75.75 0 0 1-.228.834A12.433 12.433 0 0 1 12 18.25Z" />
+                                </svg>
+                            </span>
+                            <div>
+                                <p class="text-sm font-semibold text-white m-0">Support</p>
+                                <p class="text-sm mt-2" style="color: rgba(255,255,255,0.78);">Need help? Ask the chatbot on the bottom-right — it is always on.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-12 flex flex-col gap-4 mt-4 md:mt-0">
+                        <h4 class="font-semibold text-sm text-white">Credits</h4>
+                        <div class="flex flex-wrap gap-3 text-sm" style="color: rgba(255,255,255,0.92);">
+                            <span class="px-4 py-3 rounded-xl" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); font-weight: 700;">Lou Vincent Baroro — Developer</span>
+                            <span class="px-4 py-3 rounded-xl" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); font-weight: 700;">Karl Calitamon — UX/UI Designer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 text-sm flex flex-col sm:flex-row items-center sm:items-center sm:justify-between gap-2 sm:gap-4" style="border-top: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.75); flex-wrap: wrap;">
+                    <p class="m-0">&copy; 2025 Ctrl+P · ISUFST Dingle Campus</p>
+                    <p class="m-0 text-xs" style="color: rgba(255,255,255,0.65);">All rights reserved.</p>
+                </div>
             </div>
         </footer>
+        @endunless
     </div>
 
     <!-- Chatbot widget (bottom-right) - pure JS implementation (no Alpine directives) -->
